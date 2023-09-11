@@ -1,25 +1,34 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../screen/root.dart';
-import '../screen/topology.dart';
+import '../screen/edit_topology_page.dart';
+import '../screen/experiment_page.dart';
+import '../screen/graph_view.dart';
 import 'routes.dart';
 
-final routerProvider = Provider(
-  (ref) {
-    return GoRouter(
-      initialLocation: Routes.root,
-      debugLogDiagnostics: true,
-      routes: [
+final routerProvider = GoRouter(
+  initialLocation: Routes.root,
+  debugLogDiagnostics: true,
+  routes: [
+    ShellRoute(
+      builder: (BuildContext context, GoRouterState state, Widget child) {
+        return Scaffold(
+          body: Row(children: [
+            const Expanded(child: GraphView()),
+            Expanded(child: child),
+          ]),
+        );
+      },
+      routes: <RouteBase>[
         GoRoute(
           path: Routes.root,
-          builder: (context, state) => const RootScreen(),
+          builder: (context, state) => const EditTopologyPage(),
         ),
         GoRoute(
           path: Routes.editTopology,
-          builder: (context, state) => const TopologyScreen(),
+          builder: (context, state) => const ExperimentPage(),
         ),
       ],
-    );
-  },
+    ),
+  ],
 );
