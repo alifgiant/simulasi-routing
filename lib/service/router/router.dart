@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../screen/edit_topology_page.dart';
-import '../screen/experiment_page.dart';
-import '../screen/graph_view.dart';
+import '../../screen/edit_topology_page.dart';
+import '../../screen/experiment_page.dart';
+import '../../screen/graph_view.dart';
 import 'routes.dart';
 
 final routerProvider = GoRouter(
