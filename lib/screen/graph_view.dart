@@ -6,8 +6,15 @@ class GraphView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text(runtimeType.toString()),
+      body: Container(
+        color: Theme.of(context).colorScheme.inverseSurface,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 21),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(18),
+          ),
+        ),
       ),
     );
   }

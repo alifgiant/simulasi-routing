@@ -17,9 +17,12 @@ class EditTopologyPage extends StatelessWidget {
               child: Text(runtimeType.toString()),
             ),
           ),
-          FilledButton.tonal(
-            onPressed: () => routerProvider.push(Routes.editTopology),
-            child: const Text('Next'),
+          Padding(
+            padding: const EdgeInsets.all(21.0),
+            child: FilledButton.tonal(
+              onPressed: () => routerProvider.push(Routes.editTopology),
+              child: const Text('Next'),
+            ),
           ),
         ],
       ),
