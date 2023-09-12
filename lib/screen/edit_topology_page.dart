@@ -10,6 +10,8 @@ class EditTopologyPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final graph = ref.watch(GraphService.provider).state;
+    String countTxt = graph.nodeCount().toString();
     return Scaffold(
       appBar: AppBar(title: const Text('Setup Topology')),
       body: Column(
@@ -19,16 +21,28 @@ class EditTopologyPage extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(21),
               children: [
-                TextField(
-                  decoration: const InputDecoration(
-                    filled: true,
-                    labelText: 'Jumlah Node',
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  onChanged: (s) => ref
-                      .read(GraphService.provider.notifier)
-                      .updateNodeCount(s),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        decoration: const InputDecoration(
+                          filled: true,
+                          labelText: 'Jumlah Node',
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        controller: TextEditingController(text: countTxt),
+                        onChanged: (s) => countTxt = s,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton.tonal(
+                      onPressed: () => ref
+                          .read(GraphService.provider.notifier)
+                          .updateNodeCount(countTxt),
+                      child: const Text('Set'),
+                    )
+                  ],
                 ),
               ],
             ),

@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-import 'router/router.dart';
+import 'service/router/router.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -12,8 +12,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       // Use dark or light theme based on system setting.
-      themeMode: ThemeMode.system,
-      // themeMode: ThemeMode.dark,
+      // themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       theme: FlexThemeData.light(
         useMaterial3: true,
         scheme: FlexScheme.indigoM3,

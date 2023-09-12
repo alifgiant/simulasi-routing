@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../screen/edit_topology_page.dart';
 import '../../screen/experiment_page.dart';
-import '../../screen/graph_view.dart';
+import '../../screen/view_page.dart';
+import '../../screen/visualization_page.dart';
 import 'routes.dart';
 
 final routerProvider = GoRouter(
@@ -14,7 +15,8 @@ final routerProvider = GoRouter(
       builder: (BuildContext context, GoRouterState state, Widget child) {
         return Scaffold(
           body: Row(children: [
-            const Expanded(child: GraphView()),
+            // Expanded(child: VisualizationPage()),
+            const Expanded(child: TreeViewPage()),
             Expanded(child: child),
           ]),
         );
