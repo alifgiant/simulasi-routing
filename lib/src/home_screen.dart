@@ -280,11 +280,19 @@ class LinePainter extends CustomPainter {
       ..strokeWidth = 2.0;
 
     for (final circleId in connections.keys) {
-      final cons = connections[circleId]!;
-      final start = circles[circleId]!.position;
+      final cons = connections[circleId];
+      final startCircle = circles[circleId];
+      if (cons == null || startCircle == null) continue;
+
       for (final otherCircleId in cons) {
-        final end = circles[otherCircleId]!.position;
-        canvas.drawLine(start, end, paint);
+        final endCircle = circles[otherCircleId];
+        if (endCircle == null) continue;
+
+        canvas.drawLine(
+          startCircle.position,
+          endCircle.position,
+          paint,
+        );
       }
     }
   }
