@@ -14,11 +14,13 @@ class _HomeScreenState extends State<HomeScreen> {
   final Map<int, CircleData> circles = {};
   final Map<int, Set<int>> connections = {};
   final Debouncer debouncer = Debouncer();
+  final TextEditingController connectionCtlr = TextEditingController();
 
   @override
   void dispose() {
     super.dispose();
     debouncer.dispose();
+    connectionCtlr.dispose();
   }
 
   bool isDragging = false;
@@ -107,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           const SizedBox(height: 4),
                           TextField(
+                            controller: connectionCtlr,
                             decoration: const InputDecoration(
                               hintText: 'contoh: 0-1, 2-3, 1-2',
                               hintStyle: TextStyle(color: Colors.black38),
