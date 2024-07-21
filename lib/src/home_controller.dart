@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:routing_nanda/src/circle_data.dart';
-import 'package:routing_nanda/src/history/history_holder.dart';
+import 'package:routing_nanda/src/logger.dart';
 
 import 'debouncer.dart';
 
@@ -110,7 +110,7 @@ class HomeController extends ChangeNotifier {
       );
     }
 
-    HistoryHolder.i.log('=======================');
-    HistoryHolder.i.log('run at: ${DateTime.now()}');
+    Logger.i.log('=======================', showDate: false);
+    Logger.i.log('run start');
   }
 }
