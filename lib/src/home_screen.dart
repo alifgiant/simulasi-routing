@@ -4,6 +4,7 @@ import 'package:routing_nanda/src/vm.dart';
 
 import 'circle_data.dart';
 import 'line_painter.dart';
+import 'number_formatter.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -84,13 +85,15 @@ class HomeView extends StatelessWidget {
                         width: 52,
                         child: TextField(
                           textAlign: TextAlign.right,
+                          controller: controller.fiberCtlr,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [NumberDecimalFormatter()],
                           decoration: const InputDecoration(
                             isDense: true,
                             hintText: '1',
                             hintStyle: TextStyle(color: Colors.black38),
                             border: OutlineInputBorder(),
                           ),
-                          onChanged: (s) {},
                         ),
                       ),
                     ),
@@ -101,13 +104,15 @@ class HomeView extends StatelessWidget {
                         width: 52,
                         child: TextField(
                           textAlign: TextAlign.right,
+                          controller: controller.lamdaCtlr,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [NumberDecimalFormatter()],
                           decoration: const InputDecoration(
                             isDense: true,
                             hintText: '1',
                             hintStyle: TextStyle(color: Colors.black38),
                             border: OutlineInputBorder(),
                           ),
-                          onChanged: (s) {},
                         ),
                       ),
                     ),
@@ -131,7 +136,7 @@ class HomeView extends StatelessWidget {
             ),
           ),
           FilledButton(
-            onPressed: () {},
+            onPressed: controller.onStartSimulation,
             style: FilledButton.styleFrom(
               visualDensity: VisualDensity.comfortable,
             ),
@@ -178,23 +183,24 @@ class HomeView extends StatelessWidget {
       left: 10,
       top: 10,
       child: DragTarget<CircleData>(
-          builder: (_, __, ___) => Container(
-                height: 50,
-                width: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.red.shade400,
-                    width: 3,
-                  ),
-                  color: Colors.red.shade100,
-                ),
-                child: Icon(
-                  Icons.delete_rounded,
-                  color: Colors.red.shade400,
-                ),
-              ),
-          onAcceptWithDetails: controller.onDeleteNode),
+        builder: (_, __, ___) => Container(
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.red.shade400,
+              width: 3,
+            ),
+            color: Colors.red.shade100,
+          ),
+          child: Icon(
+            Icons.delete_rounded,
+            color: Colors.red.shade400,
+          ),
+        ),
+        onAcceptWithDetails: controller.onDeleteNode,
+      ),
     );
   }
 

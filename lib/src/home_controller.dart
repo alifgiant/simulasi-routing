@@ -10,13 +10,17 @@ class HomeController extends ChangeNotifier {
   bool isDragging = false;
 
   final Debouncer debouncer = Debouncer();
-  final TextEditingController connectionCtlr = TextEditingController();
+  final connectionCtlr = TextEditingController();
+  final fiberCtlr = TextEditingController();
+  final lamdaCtlr = TextEditingController();
 
   @override
   void dispose() {
     super.dispose();
     debouncer.dispose();
     connectionCtlr.dispose();
+    fiberCtlr.dispose();
+    lamdaCtlr.dispose();
   }
 
   void changeLoad(double value) {
@@ -89,5 +93,9 @@ class HomeController extends ChangeNotifier {
     circle.position = localPosition;
     isDragging = false;
     notifyListeners();
+  }
+
+  void onStartSimulation() {
+    //
   }
 }
