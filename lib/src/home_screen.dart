@@ -90,7 +90,7 @@ class HomeView extends StatelessWidget {
                           inputFormatters: [NumberDecimalFormatter()],
                           decoration: const InputDecoration(
                             isDense: true,
-                            hintText: '1',
+                            hintText: '0',
                             hintStyle: TextStyle(color: Colors.black38),
                             border: OutlineInputBorder(),
                           ),
@@ -109,7 +109,7 @@ class HomeView extends StatelessWidget {
                           inputFormatters: [NumberDecimalFormatter()],
                           decoration: const InputDecoration(
                             isDense: true,
-                            hintText: '1',
+                            hintText: '0',
                             hintStyle: TextStyle(color: Colors.black38),
                             border: OutlineInputBorder(),
                           ),

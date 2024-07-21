@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:routing_nanda/src/circle_data.dart';
 
 import 'debouncer.dart';
@@ -11,8 +12,8 @@ class HomeController extends ChangeNotifier {
 
   final Debouncer debouncer = Debouncer();
   final connectionCtlr = TextEditingController();
-  final fiberCtlr = TextEditingController();
-  final lamdaCtlr = TextEditingController();
+  final fiberCtlr = TextEditingController(text: '1');
+  final lamdaCtlr = TextEditingController(text: '1');
 
   @override
   void dispose() {
@@ -96,6 +97,16 @@ class HomeController extends ChangeNotifier {
   }
 
   void onStartSimulation() {
-    //
+    final fiberCount = int.tryParse(fiberCtlr.text) ?? -1;
+    if (fiberCount < 1) {
+      EasyLoading.showError('Periksa jumlah fiber / harus lebih dari 0');
+    }
+
+    final lambdaCount = int.tryParse(lamdaCtlr.text) ?? -1;
+    if (lambdaCount < 1) {
+      EasyLoading.showError(
+        'Periksa jumlah panjang gelombang / harus lebih dari 0',
+      );
+    }
   }
 }
