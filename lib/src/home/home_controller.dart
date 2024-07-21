@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:routing_nanda/src/core/circle_data.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
-import '../utils/debouncer.dart';
 import '../usecases/setup_exp_config_usecase.dart';
 import '../usecases/validate_config_usecase.dart';
+import '../utils/debouncer.dart';
 
 class HomeController extends ChangeNotifier {
-  final Map<int, CircleData> circles = {};
-  final Map<int, Set<int>> connections = {};
+  final Map<int, CircleData> ciclesMap = {};
+  final Map<int, Set<int>> linksMap = {};
   double offeredLoad = 0.0;
   bool isDragging = false;
 
@@ -40,21 +40,21 @@ class HomeController extends ChangeNotifier {
   }
 
   void onTapCanvas(TapUpDetails tapDetail) {
-    final id = circles.isEmpty ? 0 : circles.keys.last + 1;
+    final id = ciclesMap.isEmpty ? 0 : ciclesMap.keys.last + 1;
     final newCircle = CircleData(id, tapDetail.localPosition);
-    circles[id] = newCircle;
+    ciclesMap[id] = newCircle;
     notifyListeners();
   }
 
   void onPanCanvas(DragUpdateDetails details) {
-    for (var circle in circles.values) {
+    for (var circle in ciclesMap.values) {
       circle.position += details.delta;
     }
     notifyListeners();
   }
 
   void onDeleteNode(DragTargetDetails<CircleData> details) {
-    circles.remove(details.data.id);
+    ciclesMap.remove(details.data.id);
     notifyListeners();
   }
 
@@ -76,7 +76,7 @@ class HomeController extends ChangeNotifier {
         currentCons.add(target);
         newCons[source] = currentCons;
       }
-      connections
+      linksMap
         ..clear()
         ..addAll(newCons);
 
@@ -108,14 +108,23 @@ class HomeController extends ChangeNotifier {
 
   void onStartSimulation() {
     Logger.i.log('======================================', showDate: false);
-
-    final validationResult = ValidateParamUsecase().start(
+    final validationResult = validateParamUsecase.start(
       fiberCtlr.text,
       lamdaCtlr.text,
       offeredLoad,
+      ciclesMap,
     );
+
     if (validationResult == null) return;
 
-    Logger.i.log('Experiment Started');
+    final config = setupExpConfigUsecase.start(
+      validationResult.fiberCount,
+      validationResult.lambdaCount,
+      validationResult.offeredLoad,
+      ciclesMap,
+      linksMap,
+    );
+
+    Logger.i.log('Experiment Started ...');
   }
 }

@@ -183,8 +183,8 @@ class HomeView extends StatelessWidget {
             ),
             CustomPaint(
               painter: LinePainter(
-                controller.circles,
-                controller.connections,
+                controller.ciclesMap,
+                controller.linksMap,
               ),
             ),
             ...nodes(ctx),
@@ -222,7 +222,7 @@ class HomeView extends StatelessWidget {
   }
 
   Iterable<Widget> nodes(BuildContext ctx) {
-    return controller.circles.values.map(
+    return controller.ciclesMap.values.map(
       (circle) {
         final node = CircleAvatar(
           radius: 20,

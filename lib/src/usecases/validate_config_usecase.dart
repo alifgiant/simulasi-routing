@@ -1,12 +1,15 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:routing_nanda/src/core/circle_data.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
-import 'package:yaml_writer/yaml_writer.dart';
 
 class ValidateParamUsecase {
-  final yamlWriter = YamlWriter();
-
-  ValidationResult? start(String fiber, String lambda, double offeredLoad) {
-    Logger.i.log('Checking Simulation Parameter');
+  ValidationResult? start(
+    String fiber,
+    String lambda,
+    double offeredLoad,
+    Map<int, CircleData> nodes,
+  ) {
+    Logger.i.log('Checking Simulation Parameter ...');
     final fiberCount = int.tryParse(fiber) ?? -1;
     if (fiberCount < 1) {
       EasyLoading.showError('Periksa jumlah fiber / harus lebih dari 0');
@@ -31,8 +34,12 @@ class ValidateParamUsecase {
       return null;
     }
 
+    if (nodes.length < 2) {
+      EasyLoading.showError('Tidak bisa menjalankan simulasi, minimal 2 node');
+    }
+
     Logger.i.log(
-      'Simulation Parameter is valid\n${yamlWriter.write(
+      'Simulation Parameter is valid\n${defaultYamlWriter.write(
         {
           'fiberCount': fiberCount,
           'lambdaCount': lambdaCount,

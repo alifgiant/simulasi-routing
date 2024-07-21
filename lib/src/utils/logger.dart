@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:routing_nanda/src/utils/history_holder.dart';
+import 'package:yaml_writer/yaml_writer.dart';
 
 class Logger {
   const Logger._();
@@ -6,8 +8,10 @@ class Logger {
   static const i = Logger._();
 
   void log(String s, {bool showDate = true}) {
-    HistoryHolder.i.log(
-      showDate ? '${DateTime.now()} => $s' : s,
-    );
+    final str = showDate ? '${DateTime.now()} => $s' : s;
+    HistoryHolder.i.log(str);
+    if (kDebugMode) print(str);
   }
 }
+
+final defaultYamlWriter = YamlWriter();
