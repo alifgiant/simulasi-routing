@@ -1,4 +1,4 @@
-import 'package:routing_nanda/src/history/history_holder.dart';
+import 'package:routing_nanda/src/utils/history_holder.dart';
 
 class Logger {
   const Logger._();

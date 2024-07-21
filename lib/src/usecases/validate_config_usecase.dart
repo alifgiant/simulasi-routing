@@ -1,5 +1,5 @@
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:routing_nanda/src/logger.dart';
+import 'package:routing_nanda/src/utils/logger.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 
 class ValidateParamUsecase {

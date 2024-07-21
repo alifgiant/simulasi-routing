@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:routing_nanda/src/history/history_screen.dart';
-import 'package:routing_nanda/src/home_controller.dart';
-import 'package:routing_nanda/src/usecases/validate_config_usecase.dart';
-import 'package:routing_nanda/src/vm.dart';
+import 'package:routing_nanda/src/home/home_controller.dart';
+import 'package:routing_nanda/src/core/vm.dart';
 
-import 'circle_data.dart';
-import 'line_painter.dart';
-import 'number_formatter.dart';
+import '../core/circle_data.dart';
+import '../core/line_painter.dart';
+import '../utils/number_formatter.dart';
+import '../usecases/setup_exp_config_usecase.dart';
+import '../usecases/validate_config_usecase.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,6 +17,7 @@ class HomeScreen extends StatelessWidget {
     return VmView(
       createVm: (context) => HomeController(
         validateParamUsecase: ValidateParamUsecase(),
+        setupExpConfigUsecase: SetupExpConfigUsecase(),
       ),
       builder: (controller) => HomeView(controller: controller),
     );

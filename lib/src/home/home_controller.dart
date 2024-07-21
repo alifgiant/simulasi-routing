@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:routing_nanda/src/circle_data.dart';
-import 'package:routing_nanda/src/logger.dart';
+import 'package:routing_nanda/src/core/circle_data.dart';
+import 'package:routing_nanda/src/utils/logger.dart';
 
-import 'debouncer.dart';
-import 'usecases/validate_config_usecase.dart';
+import '../utils/debouncer.dart';
+import '../usecases/setup_exp_config_usecase.dart';
+import '../usecases/validate_config_usecase.dart';
 
 class HomeController extends ChangeNotifier {
   final Map<int, CircleData> circles = {};
@@ -17,9 +18,11 @@ class HomeController extends ChangeNotifier {
   final lamdaCtlr = TextEditingController(text: '1');
 
   final ValidateParamUsecase validateParamUsecase;
+  final SetupExpConfigUsecase setupExpConfigUsecase;
 
   HomeController({
     required this.validateParamUsecase,
+    required this.setupExpConfigUsecase,
   });
 
   @override

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:routing_nanda/src/history/history_holder.dart';
-import 'package:routing_nanda/src/utils.dart';
+import 'package:routing_nanda/src/utils/history_holder.dart';
+import 'package:routing_nanda/src/utils/utils.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
