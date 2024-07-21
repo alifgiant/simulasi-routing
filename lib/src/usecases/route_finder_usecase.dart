@@ -30,8 +30,4 @@ class RouteFinderUsecase {
     )}');
     return nodes;
   }
-
-  void setup() {
-    //
-  }
 }

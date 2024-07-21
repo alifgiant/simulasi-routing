@@ -3,6 +3,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:routing_nanda/src/core/circle_data.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
+import '../usecases/experiment_usecase.dart';
 import '../usecases/route_finder_usecase.dart';
 import '../usecases/setup_exp_config_usecase.dart';
 import '../usecases/validate_config_usecase.dart';
@@ -25,11 +26,13 @@ class HomeController extends ChangeNotifier {
   final ValidateParamUsecase validateParamUsecase;
   final SetupNetworkConfigUsecase setupNetworkConfigUsecase;
   final RouteFinderUsecase routeFinderUsecase;
+  final ExperimentUsecase experimentUsecase;
 
   HomeController({
     required this.validateParamUsecase,
     required this.setupNetworkConfigUsecase,
     required this.routeFinderUsecase,
+    required this.experimentUsecase,
   });
 
   @override
@@ -159,7 +162,10 @@ class HomeController extends ChangeNotifier {
     Logger.i.log('Experiment Started ...');
     Logger.i.log('Step 1: Construction of pre-defined paths');
     final routingMap = routeFinderUsecase.start(networkConfig);
+
     Logger.i.log('Step 2: Collecting information by signaling');
+    experimentUsecase.start(routingMap);
+
     // final nodes = networkConfig.nodes..shuffle();
     // Logger.i.log('Communication from ${nodes[0]} to ${nodes[1]}');
     Logger.i.log('Step 3: Route and wavelength selection');

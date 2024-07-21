@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:routing_nanda/src/core/vm.dart';
 import 'package:routing_nanda/src/history/history_screen.dart';
 import 'package:routing_nanda/src/home/home_controller.dart';
+import 'package:routing_nanda/src/usecases/experiment_usecase.dart';
 import 'package:routing_nanda/src/usecases/route_finder_usecase.dart';
 
 import '../core/circle_data.dart';
@@ -19,6 +20,7 @@ class HomeScreen extends StatelessWidget {
         validateParamUsecase: ValidateParamUsecase(),
         setupNetworkConfigUsecase: SetupNetworkConfigUsecase(),
         routeFinderUsecase: RouteFinderUsecase(),
+        experimentUsecase: ExperimentUsecase(),
       ),
       builder: (controller) => HomeView(controller: controller),
     );

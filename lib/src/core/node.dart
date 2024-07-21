@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:routing_nanda/src/core/simulation_notifier.dart';
 
 import 'circle_data.dart';
 
@@ -66,6 +67,21 @@ class Node {
           ),
         ),
       );
+    }
+  }
+
+  void startExperiment() {
+    SimulationNotifier.i.addListener(onSimulationEvent);
+  }
+
+  void onSimulationEvent() {
+    switch (SimulationNotifier.i.isRunning) {
+      case false:
+        SimulationNotifier.i.removeListener(onSimulationEvent);
+        break;
+      case true:
+        // do nothing
+        break;
     }
   }
 
