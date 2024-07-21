@@ -12,30 +12,10 @@ class ValidateParamUsecase {
     Map<int, CircleData> nodes,
   ) {
     Logger.i.log('Checking Simulation Parameter ...');
-    if (fiberCount < 1) {
-      EasyLoading.showError('Periksa jumlah fiber / harus lebih dari 0');
-      Logger.i.log('Error fiberCount < 1');
-      return null;
-    }
-
-    if (lambdaCount < 1) {
-      EasyLoading.showError(
-        'Periksa jumlah panjang gelombang / harus lebih dari 0',
-      );
-      Logger.i.log('Error lambdaCount < 1');
-      return null;
-    }
-
-    if (holdTime <= 0) {
-      EasyLoading.showError(
-        'Tidak bisa menjalankan simulasi, atur waktu tinggu lebih besar dari 0',
-      );
-      Logger.i.log('Error holdTime <= 0');
-      return null;
-    }
 
     if (nodes.length < 2) {
       EasyLoading.showError('Tidak bisa menjalankan simulasi, minimal 2 node');
+      Logger.i.log('Error nodes.length < 2');
       return null;
     }
 
