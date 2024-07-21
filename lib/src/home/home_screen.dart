@@ -8,7 +8,6 @@ import '../core/circle_data.dart';
 import '../core/line_painter.dart';
 import '../usecases/setup_exp_config_usecase.dart';
 import '../usecases/validate_config_usecase.dart';
-import '../utils/number_formatter.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -100,40 +99,32 @@ class HomeView extends StatelessWidget {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('Banyak Serat'),
-                      trailing: SizedBox(
-                        width: 52,
-                        child: TextField(
-                          textAlign: TextAlign.right,
-                          controller: controller.fiberCtlr,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [NumberDecimalFormatter()],
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            hintText: '0',
-                            hintStyle: TextStyle(color: Colors.black38),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
+                      trailing: Text(
+                        controller.fiberCount.toString(),
+                        style: const TextStyle(fontSize: 16),
                       ),
+                    ),
+                    Slider(
+                      value: controller.fiberCount.toDouble(),
+                      min: 1,
+                      max: 24,
+                      divisions: 24,
+                      onChanged: controller.changeFiber,
                     ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('Panjang Gelombang'),
-                      trailing: SizedBox(
-                        width: 52,
-                        child: TextField(
-                          textAlign: TextAlign.right,
-                          controller: controller.lamdaCtlr,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [NumberDecimalFormatter()],
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            hintText: '0',
-                            hintStyle: TextStyle(color: Colors.black38),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
+                      trailing: Text(
+                        controller.lambdaCount.toString(),
+                        style: const TextStyle(fontSize: 16),
                       ),
+                    ),
+                    Slider(
+                      value: controller.lambdaCount.toDouble(),
+                      min: 1,
+                      max: 16,
+                      divisions: 16,
+                      onChanged: controller.changeLambda,
                     ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
@@ -147,6 +138,21 @@ class HomeView extends StatelessWidget {
                       value: controller.offeredLoad,
                       divisions: 100,
                       onChanged: controller.changeLoad,
+                    ),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Durasi Hold Ligth-path (detik)'),
+                      trailing: Text(
+                        controller.holdingTime.toString(),
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    Slider(
+                      value: controller.holdingTime,
+                      min: 0,
+                      max: 20,
+                      divisions: 10,
+                      onChanged: controller.changeHoldTime,
                     ),
                     const SizedBox(height: 4),
                   ],
@@ -185,7 +191,7 @@ class HomeView extends StatelessWidget {
             ),
             CustomPaint(
               painter: LinePainter(
-                controller.ciclesMap,
+                controller.circlesMap,
                 controller.linksMap,
               ),
             ),
@@ -224,7 +230,7 @@ class HomeView extends StatelessWidget {
   }
 
   Iterable<Widget> nodes(BuildContext ctx) {
-    return controller.ciclesMap.values.map(
+    return controller.circlesMap.values.map(
       (circle) {
         final node = CircleAvatar(
           radius: 20,

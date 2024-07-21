@@ -7,13 +7,14 @@ import 'package:yaml_writer/yaml_writer.dart';
 class SetupNetworkConfigUsecase {
   final yamlWriter = YamlWriter(toEncodable: (object) => object.toString());
 
-  ConfigResult start(
-    int fiber,
-    int lambda,
-    double offeredLoad,
-    Map<int, CircleData> circlesMap,
-    Map<int, Set<int>> linksMap,
-  ) {
+  ConfigResult start({
+    required int fiber,
+    required int lambda,
+    required double holdTime,
+    required double offeredLoad,
+    required Map<int, CircleData> circlesMap,
+    required Map<int, Set<int>> linksMap,
+  }) {
     Logger.i.log('Configuring Network ...');
     final cables = <Link>[];
     for (var connection in linksMap.entries) {
@@ -35,17 +36,17 @@ class SetupNetworkConfigUsecase {
     }
     cables.shuffle();
 
+    // final rateOfRequest = offeredLoad * fiber * lambda / holdTime;
+
     Logger.i.log('Total cables (link x fiber x lambda): ${cables.length}');
     Logger.i.log('Offered Load: $offeredLoad');
-    final lastIndex = cables.length - 1;
-    final usedCount = (offeredLoad * lastIndex).floor();
-    final availableLink = cables.sublist(usedCount);
-
-    Logger.i.log('Available Link:\n${yamlWriter.write(availableLink)}');
+    Logger.i.log('Request Rate / second (λ): $offeredLoad');
+    Logger.i.log('Offered Load: $offeredLoad');
+    Logger.i.log('Available Link:\n${yamlWriter.write(cables)}');
     final nodes = circlesMap.values.map(Node.fromCircle).toList();
 
     return ConfigResult(
-      availableLink: availableLink,
+      availableLink: cables,
       nodes: nodes,
     );
   }

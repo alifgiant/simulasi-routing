@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:routing_nanda/src/core/circle_data.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
@@ -8,15 +9,16 @@ import '../usecases/validate_config_usecase.dart';
 import '../utils/debouncer.dart';
 
 class HomeController extends ChangeNotifier {
-  final Map<int, CircleData> ciclesMap = {};
+  final Map<int, CircleData> circlesMap = {};
   final Map<int, Set<int>> linksMap = {};
-  double offeredLoad = 0.0;
+  double offeredLoad = 0.7;
+  int fiberCount = 4;
+  int lambdaCount = 8;
+  double holdingTime = 10; // second
   bool isDragging = false;
 
   final Debouncer debouncer = Debouncer();
   final connectionCtlr = TextEditingController();
-  final fiberCtlr = TextEditingController(text: '1');
-  final lamdaCtlr = TextEditingController(text: '1');
 
   final ValidateParamUsecase validateParamUsecase;
   final SetupNetworkConfigUsecase setupNetworkConfigUsecase;
@@ -33,8 +35,16 @@ class HomeController extends ChangeNotifier {
     super.dispose();
     debouncer.dispose();
     connectionCtlr.dispose();
-    fiberCtlr.dispose();
-    lamdaCtlr.dispose();
+  }
+
+  void changeFiber(double value) {
+    fiberCount = value.toInt();
+    notifyListeners();
+  }
+
+  void changeLambda(double value) {
+    lambdaCount = value.toInt();
+    notifyListeners();
   }
 
   void changeLoad(double value) {
@@ -42,22 +52,27 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void changeHoldTime(double value) {
+    holdingTime = value;
+    notifyListeners();
+  }
+
   void onTapCanvas(TapUpDetails tapDetail) {
-    final id = ciclesMap.isEmpty ? 0 : ciclesMap.keys.last + 1;
+    final id = circlesMap.isEmpty ? 0 : circlesMap.keys.last + 1;
     final newCircle = CircleData(id, tapDetail.localPosition);
-    ciclesMap[id] = newCircle;
+    circlesMap[id] = newCircle;
     notifyListeners();
   }
 
   void onPanCanvas(DragUpdateDetails details) {
-    for (var circle in ciclesMap.values) {
+    for (var circle in circlesMap.values) {
       circle.position += details.delta;
     }
     notifyListeners();
   }
 
   void onDeleteNode(DragTargetDetails<CircleData> details) {
-    ciclesMap.remove(details.data.id);
+    circlesMap.remove(details.data.id);
     notifyListeners();
   }
 
@@ -110,22 +125,29 @@ class HomeController extends ChangeNotifier {
   }
 
   void onStartSimulation() {
+    EasyLoading.show(
+      dismissOnTap: false,
+      maskType: EasyLoadingMaskType.black,
+    );
+
     Logger.i.log('======================================', showDate: false);
     final validationResult = validateParamUsecase.start(
-      fiberCtlr.text,
-      lamdaCtlr.text,
+      fiberCount,
+      lambdaCount,
       offeredLoad,
-      ciclesMap,
+      holdingTime,
+      circlesMap,
     );
 
     if (validationResult == null) return;
 
     final config = setupNetworkConfigUsecase.start(
-      validationResult.fiberCount,
-      validationResult.lambdaCount,
-      validationResult.offeredLoad,
-      ciclesMap,
-      linksMap,
+      fiber: validationResult.fiberCount,
+      lambda: validationResult.lambdaCount,
+      holdTime: validationResult.holdTime,
+      offeredLoad: validationResult.offeredLoad,
+      circlesMap: circlesMap,
+      linksMap: linksMap,
     );
 
     Logger.i.log('Experiment Started ...');
@@ -136,5 +158,7 @@ class HomeController extends ChangeNotifier {
     Logger.i.log('Step 2: Collecting information by signaling');
     Logger.i.log('Step 3: Route and wavelength selection');
     //
+
+    EasyLoading.dismiss();
   }
 }

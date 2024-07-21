@@ -3,21 +3,20 @@ import 'package:routing_nanda/src/core/circle_data.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
 class ValidateParamUsecase {
-  ValidationResult? start(
-    String fiber,
-    String lambda,
+  ExperimentParams? start(
+    int fiberCount,
+    int lambdaCount,
     double offeredLoad,
+    double holdTime,
     Map<int, CircleData> nodes,
   ) {
     Logger.i.log('Checking Simulation Parameter ...');
-    final fiberCount = int.tryParse(fiber) ?? -1;
     if (fiberCount < 1) {
       EasyLoading.showError('Periksa jumlah fiber / harus lebih dari 0');
       Logger.i.log('Error fiberCount < 1');
       return null;
     }
 
-    final lambdaCount = int.tryParse(lambda) ?? -1;
     if (lambdaCount < 1) {
       EasyLoading.showError(
         'Periksa jumlah panjang gelombang / harus lebih dari 0',
@@ -34,8 +33,17 @@ class ValidateParamUsecase {
       return null;
     }
 
+    if (holdTime <= 0) {
+      EasyLoading.showError(
+        'Tidak bisa menjalankan simulasi, atur waktu tinggu lebih besar dari 0',
+      );
+      Logger.i.log('Error holdTime <= 0');
+      return null;
+    }
+
     if (nodes.length < 2) {
       EasyLoading.showError('Tidak bisa menjalankan simulasi, minimal 2 node');
+      return null;
     }
 
     Logger.i.log(
@@ -44,26 +52,28 @@ class ValidateParamUsecase {
           'fiberCount': fiberCount,
           'lambdaCount': lambdaCount,
           'offeredLoad': offeredLoad,
+          'holdTime': '${holdTime}s',
         },
       )}',
     );
 
-    return ValidationResult(
+    return ExperimentParams(
       fiberCount: fiberCount,
       lambdaCount: lambdaCount,
       offeredLoad: offeredLoad,
+      holdTime: holdTime,
     );
   }
 }
 
-class ValidationResult {
+class ExperimentParams {
   final int fiberCount, lambdaCount;
+  final double offeredLoad, holdTime, rateOfRequest;
 
-  final double offeredLoad;
-
-  ValidationResult({
+  const ExperimentParams({
     required this.fiberCount,
     required this.lambdaCount,
     required this.offeredLoad,
-  });
+    required this.holdTime,
+  }) : rateOfRequest = offeredLoad * fiberCount * lambdaCount / holdTime;
 }
