@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:routing_nanda/src/debouncer.dart';
+import 'package:routing_nanda/src/home_controller.dart';
+import 'package:routing_nanda/src/vm.dart';
 
 import 'circle_data.dart';
 import 'line_painter.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  Widget build(BuildContext context) {
+    return VmView(
+      createVm: (context) => HomeController(),
+      builder: (controller) => HomeView(controller: controller),
+    );
+  }
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final Map<int, CircleData> circles = {};
-  final Map<int, Set<int>> connections = {};
-  final Debouncer debouncer = Debouncer();
-  final TextEditingController connectionCtlr = TextEditingController();
+class HomeView extends StatelessWidget {
+  final HomeController controller;
 
-  @override
-  void dispose() {
-    super.dispose();
-    debouncer.dispose();
-    connectionCtlr.dispose();
-  }
-
-  bool isDragging = false;
-  double offeredLoad = 0.0;
+  const HomeView({
+    super.key,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Expanded configArea() {
+  Widget configArea() {
     return Expanded(
       flex: 1,
       child: Column(
@@ -62,14 +60,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     const SizedBox(height: 4),
                     TextField(
-                      controller: connectionCtlr,
+                      controller: controller.connectionCtlr,
                       decoration: const InputDecoration(
                         hintText: 'contoh: 0-1, 2-3, 1-2',
                         hintStyle: TextStyle(color: Colors.black38),
                         border: OutlineInputBorder(),
                       ),
                       maxLines: 3,
-                      onChanged: onConnectionChanged,
+                      onChanged: controller.onConnectionChanged,
                     ),
                     const SizedBox(height: 4),
                   ],
@@ -117,14 +115,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       contentPadding: EdgeInsets.zero,
                       title: const Text('Beban'),
                       trailing: Text(
-                        offeredLoad.toString(),
+                        controller.offeredLoad.toString(),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
                     Slider(
-                      value: offeredLoad,
+                      value: controller.offeredLoad,
                       divisions: 100,
-                      onChanged: (val) => setState(() => offeredLoad = val),
+                      onChanged: controller.changeLoad,
                     ),
                     const SizedBox(height: 4),
                   ],
@@ -145,19 +143,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Expanded simulationArea() {
+  Widget simulationArea() {
     return Expanded(
       flex: 3,
       child: Builder(
         builder: (ctx) => Stack(
           children: [
             GestureDetector(
-              onTapUp: onTapCanvas,
-              onPanUpdate: (details) => setState(() {
-                for (var circle in circles.values) {
-                  circle.position += details.delta;
-                }
-              }),
+              onTapUp: controller.onTapCanvas,
+              onPanUpdate: controller.onPanCanvas,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -165,9 +159,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            CustomPaint(painter: LinePainter(circles, connections)),
+            CustomPaint(
+              painter: LinePainter(
+                controller.circles,
+                controller.connections,
+              ),
+            ),
             ...nodes(ctx),
-            if (isDragging) trashBinView(),
+            if (controller.isDragging) trashBinView(),
           ],
         ),
       ),
@@ -179,57 +178,28 @@ class _HomeScreenState extends State<HomeScreen> {
       left: 10,
       top: 10,
       child: DragTarget<CircleData>(
-        builder: (_, __, ___) => Container(
-          height: 50,
-          width: 50,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.red.shade400,
-              width: 3,
-            ),
-            color: Colors.red.shade100,
-          ),
-          child: Icon(
-            Icons.delete_rounded,
-            color: Colors.red.shade400,
-          ),
-        ),
-        onAcceptWithDetails: (detail) => setState(
-          () => circles.remove(detail.data.id),
-        ),
-      ),
+          builder: (_, __, ___) => Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.red.shade400,
+                    width: 3,
+                  ),
+                  color: Colors.red.shade100,
+                ),
+                child: Icon(
+                  Icons.delete_rounded,
+                  color: Colors.red.shade400,
+                ),
+              ),
+          onAcceptWithDetails: controller.onDeleteNode),
     );
   }
 
-  void onConnectionChanged(String s) {
-    debouncer.start(() {
-      final splitted = s.split(',');
-      Map<int, Set<int>> newCons = {};
-      for (var element in splitted) {
-        final trimmed = element.trim();
-        final nodes = trimmed.split('-').map(int.tryParse);
-        if (nodes.any((n) => n == null) || nodes.length != 2) {
-          continue;
-        }
-
-        final source = nodes.first! < nodes.last! ? nodes.first! : nodes.last!;
-        final target = nodes.first! < nodes.last! ? nodes.last! : nodes.first!;
-
-        final currentCons = newCons[source] ?? {};
-        currentCons.add(target);
-        newCons[source] = currentCons;
-      }
-      setState(() {
-        connections
-          ..clear()
-          ..addAll(newCons);
-      });
-    });
-  }
-
   Iterable<Widget> nodes(BuildContext ctx) {
-    return circles.values.map(
+    return controller.circles.values.map(
       (circle) {
         final node = CircleAvatar(
           radius: 20,
@@ -243,34 +213,16 @@ class _HomeScreenState extends State<HomeScreen> {
             data: circle,
             feedback: node,
             childWhenDragging: const SizedBox.shrink(),
+            onDragUpdate: (details) => controller.onDragNode(details, circle),
+            onDragEnd: (details) => controller.onDragEnd(
+              details,
+              circle,
+              ctx.findRenderObject() as RenderBox,
+            ),
             child: node,
-            onDragUpdate: (details) {
-              final localPosition = circle.position + details.delta;
-              setState(() {
-                circle.position = localPosition;
-                isDragging = true;
-              });
-            },
-            onDragEnd: (detail) {
-              RenderBox renderBox = ctx.findRenderObject() as RenderBox;
-              Offset localPosition = renderBox.globalToLocal(
-                // add offset to counter removed top padding
-                detail.offset + const Offset(20, 20),
-              );
-              setState(() {
-                circle.position = localPosition;
-                isDragging = false;
-              });
-            },
           ),
         );
       },
     );
-  }
-
-  void onTapCanvas(TapUpDetails tapDetail) {
-    final id = circles.isEmpty ? 0 : circles.keys.last + 1;
-    final newCircle = CircleData(id, tapDetail.localPosition);
-    setState(() => circles[id] = newCircle);
   }
 }
