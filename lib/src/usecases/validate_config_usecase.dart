@@ -28,7 +28,7 @@ class ValidateParamUsecase {
     );
 
     Logger.i.log(
-      'Simulation Parameter is valid\n${defaultYamlWriter.write(params)}',
+      'Simulation Parameter is valid ${yamlWriter.write(params)}',
     );
 
     return params;
@@ -61,5 +61,10 @@ class ExperimentParams {
       'Rate Request / second (λ)': '$rateOfRequest/s',
       'Experiment Duration': '${experimentDuration}s',
     };
+  }
+
+  @override
+  String toString() {
+    return yamlWriter.write(toJson());
   }
 }

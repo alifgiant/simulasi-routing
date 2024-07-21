@@ -14,5 +14,4 @@ class Logger {
   }
 }
 
-final defaultYamlWriter = YamlWriter();
-final stringYamlWriter = YamlWriter(toEncodable: (object) => object.toString());
+final yamlWriter = YamlWriter(toEncodable: (object) => object.toString());

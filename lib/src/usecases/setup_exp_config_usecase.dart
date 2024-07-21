@@ -1,6 +1,5 @@
 import 'package:routing_nanda/src/core/circle_data.dart';
 import 'package:routing_nanda/src/core/light_path.dart';
-import 'package:routing_nanda/src/core/node.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
 class SetupNetworkConfigUsecase {
@@ -12,7 +11,6 @@ class SetupNetworkConfigUsecase {
   }) {
     Logger.i.log('Configuring Network ...');
 
-    final nodes = circlesMap.values.map(Node.fromCircle).toList();
     final lightpaths = <LightPath>[];
     for (var connection in linksMap.entries) {
       final source = connection.key;
@@ -38,10 +36,10 @@ class SetupNetworkConfigUsecase {
               .map((target) => 'Node(${entry.key}) <-> Node($target)')
               .toList(),
     );
-    Logger.i.log('Network Configured: \n${stringYamlWriter.write(
+    Logger.i.log('Network Configured: \n${yamlWriter.write(
       {
-        'Nodes': nodes,
-        'Total Node': nodes.length,
+        'Nodes': circlesMap.values,
+        'Total Node': circlesMap.length,
         'Links': links,
         'Total Link': linksMap.values.fold(
           0,
@@ -53,7 +51,7 @@ class SetupNetworkConfigUsecase {
 
     return ConfigResult(
       lightpaths: lightpaths,
-      nodes: nodes,
+      circlesMap: circlesMap,
       linksMap: linksMap,
     );
   }
@@ -61,12 +59,23 @@ class SetupNetworkConfigUsecase {
 
 class ConfigResult {
   final List<LightPath> lightpaths;
-  final List<Node> nodes;
+  final Map<int, CircleData> circlesMap;
   final Map<int, Set<int>> linksMap;
+  final Map<int, Set<int>> reversedLinksMap;
 
   ConfigResult({
     required this.lightpaths,
-    required this.nodes,
+    required this.circlesMap,
     required this.linksMap,
-  });
+  }) : reversedLinksMap = {} {
+    // setup reverse link
+    for (var entry in linksMap.entries) {
+      final source = entry.key;
+      for (var target in entry.value) {
+        final reverseSet = reversedLinksMap[target] ?? {};
+        reverseSet.add(source);
+        reversedLinksMap[target] = reverseSet;
+      }
+    }
+  }
 }

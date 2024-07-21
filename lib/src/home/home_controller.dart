@@ -157,11 +157,11 @@ class HomeController extends ChangeNotifier {
     );
 
     Logger.i.log('Experiment Started ...');
+    Logger.i.log('Step 1: Construction of pre-defined paths');
+    final routingMap = routeFinderUsecase.start(networkConfig);
+    Logger.i.log('Step 2: Collecting information by signaling');
     // final nodes = networkConfig.nodes..shuffle();
     // Logger.i.log('Communication from ${nodes[0]} to ${nodes[1]}');
-    Logger.i.log('Step 1: Construction of pre-defined paths');
-    routeFinderUsecase.start(networkConfig);
-    Logger.i.log('Step 2: Collecting information by signaling');
     Logger.i.log('Step 3: Route and wavelength selection');
     //
 

@@ -5,4 +5,7 @@ class CircleData {
   Offset position;
 
   CircleData(this.id, this.position);
+
+  @override
+  String toString() => 'Node($id)';
 }
