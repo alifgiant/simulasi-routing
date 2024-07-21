@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:routing_nanda/src/history/history_screen.dart';
 import 'package:routing_nanda/src/home_controller.dart';
 import 'package:routing_nanda/src/vm.dart';
 
@@ -29,7 +30,18 @@ class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Routing Simulation')),
+      appBar: AppBar(
+        title: const Text('Routing Simulation'),
+        actions: [
+          IconButton.outlined(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const HistoryScreen(),
+            )),
+            icon: const Icon(Icons.history),
+          ),
+          const SizedBox(width: 12)
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:routing_nanda/src/circle_data.dart';
+import 'package:routing_nanda/src/history/history_holder.dart';
 
 import 'debouncer.dart';
 
@@ -108,5 +109,8 @@ class HomeController extends ChangeNotifier {
         'Periksa jumlah panjang gelombang / harus lebih dari 0',
       );
     }
+
+    HistoryHolder.i.log('=======================');
+    HistoryHolder.i.log('run at: ${DateTime.now()}');
   }
 }

@@ -11,8 +11,8 @@ class LinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.red
-      ..strokeWidth = 2.0;
+      ..color = Colors.black
+      ..strokeWidth = 1.0;
 
     for (final circleId in connections.keys) {
       final cons = connections[circleId];
