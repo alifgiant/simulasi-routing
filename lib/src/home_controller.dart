@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:routing_nanda/src/circle_data.dart';
 import 'package:routing_nanda/src/logger.dart';
 
 import 'debouncer.dart';
+import 'usecases/validate_config_usecase.dart';
 
 class HomeController extends ChangeNotifier {
   final Map<int, CircleData> circles = {};
@@ -15,6 +15,12 @@ class HomeController extends ChangeNotifier {
   final connectionCtlr = TextEditingController();
   final fiberCtlr = TextEditingController(text: '1');
   final lamdaCtlr = TextEditingController(text: '1');
+
+  final ValidateParamUsecase validateParamUsecase;
+
+  HomeController({
+    required this.validateParamUsecase,
+  });
 
   @override
   void dispose() {
@@ -98,19 +104,15 @@ class HomeController extends ChangeNotifier {
   }
 
   void onStartSimulation() {
-    final fiberCount = int.tryParse(fiberCtlr.text) ?? -1;
-    if (fiberCount < 1) {
-      EasyLoading.showError('Periksa jumlah fiber / harus lebih dari 0');
-    }
+    Logger.i.log('======================================', showDate: false);
 
-    final lambdaCount = int.tryParse(lamdaCtlr.text) ?? -1;
-    if (lambdaCount < 1) {
-      EasyLoading.showError(
-        'Periksa jumlah panjang gelombang / harus lebih dari 0',
-      );
-    }
+    final validationResult = ValidateParamUsecase().start(
+      fiberCtlr.text,
+      lamdaCtlr.text,
+      offeredLoad,
+    );
+    if (validationResult == null) return;
 
-    Logger.i.log('=======================', showDate: false);
-    Logger.i.log('run start');
+    Logger.i.log('Experiment Started');
   }
 }

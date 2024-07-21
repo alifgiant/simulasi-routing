@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:routing_nanda/src/history/history_screen.dart';
 import 'package:routing_nanda/src/home_controller.dart';
+import 'package:routing_nanda/src/usecases/validate_config_usecase.dart';
 import 'package:routing_nanda/src/vm.dart';
 
 import 'circle_data.dart';
@@ -13,7 +14,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return VmView(
-      createVm: (context) => HomeController(),
+      createVm: (context) => HomeController(
+        validateParamUsecase: ValidateParamUsecase(),
+      ),
       builder: (controller) => HomeView(controller: controller),
     );
   }
