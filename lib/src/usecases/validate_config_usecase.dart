@@ -7,7 +7,8 @@ class ValidateParamUsecase {
     int fiberCount,
     int lambdaCount,
     double offeredLoad,
-    double holdTime,
+    int holdTime,
+    int experimentDuration,
     Map<int, CircleData> nodes,
   ) {
     Logger.i.log('Checking Simulation Parameter ...');
@@ -53,6 +54,7 @@ class ValidateParamUsecase {
           'lambdaCount': lambdaCount,
           'offeredLoad': offeredLoad,
           'holdTime': '${holdTime}s',
+          'experimentDuration': '${experimentDuration}s',
         },
       )}',
     );
@@ -62,18 +64,20 @@ class ValidateParamUsecase {
       lambdaCount: lambdaCount,
       offeredLoad: offeredLoad,
       holdTime: holdTime,
+      experimentDuration: experimentDuration,
     );
   }
 }
 
 class ExperimentParams {
-  final int fiberCount, lambdaCount;
-  final double offeredLoad, holdTime, rateOfRequest;
+  final int fiberCount, lambdaCount, holdTime, experimentDuration;
+  final double offeredLoad, rateOfRequest;
 
   const ExperimentParams({
     required this.fiberCount,
     required this.lambdaCount,
     required this.offeredLoad,
     required this.holdTime,
+    required this.experimentDuration,
   }) : rateOfRequest = offeredLoad * fiberCount * lambdaCount / holdTime;
 }

@@ -148,7 +148,7 @@ class HomeView extends StatelessWidget {
                       ),
                     ),
                     Slider(
-                      value: controller.holdingTime,
+                      value: controller.holdingTime.toDouble(),
                       min: 0,
                       max: 20,
                       divisions: 10,
@@ -160,6 +160,22 @@ class HomeView extends StatelessWidget {
               ],
             ),
           ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Durasi Simulasi (detik)'),
+            trailing: Text(
+              controller.experimentDuration.toString(),
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+          Slider(
+            value: controller.experimentDuration.toDouble(),
+            min: 0,
+            max: 240,
+            divisions: 24,
+            onChanged: controller.changeExperimentDuration,
+          ),
+          const SizedBox(height: 12),
           FilledButton(
             onPressed: controller.onStartSimulation,
             style: FilledButton.styleFrom(

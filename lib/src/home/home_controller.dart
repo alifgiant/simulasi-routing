@@ -12,9 +12,11 @@ class HomeController extends ChangeNotifier {
   final Map<int, CircleData> circlesMap = {};
   final Map<int, Set<int>> linksMap = {};
   double offeredLoad = 0.7;
-  int fiberCount = 4;
-  int lambdaCount = 8;
-  double holdingTime = 10; // second
+  int fiberCount = 4,
+      lambdaCount = 8,
+      holdingTime = 10, // second
+      experimentDuration = 120; // second
+
   bool isDragging = false;
 
   final Debouncer debouncer = Debouncer();
@@ -53,7 +55,12 @@ class HomeController extends ChangeNotifier {
   }
 
   void changeHoldTime(double value) {
-    holdingTime = value;
+    holdingTime = value.toInt();
+    notifyListeners();
+  }
+
+  void changeExperimentDuration(double value) {
+    experimentDuration = value.toInt();
     notifyListeners();
   }
 
@@ -136,6 +143,7 @@ class HomeController extends ChangeNotifier {
       lambdaCount,
       offeredLoad,
       holdingTime,
+      experimentDuration,
       circlesMap,
     );
 

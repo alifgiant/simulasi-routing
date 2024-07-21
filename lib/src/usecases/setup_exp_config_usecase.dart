@@ -10,7 +10,7 @@ class SetupNetworkConfigUsecase {
   ConfigResult start({
     required int fiber,
     required int lambda,
-    required double holdTime,
+    required int holdTime,
     required double offeredLoad,
     required Map<int, CircleData> circlesMap,
     required Map<int, Set<int>> linksMap,
