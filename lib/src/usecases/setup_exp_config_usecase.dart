@@ -4,10 +4,10 @@ import 'package:routing_nanda/src/core/node.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 
-class SetupExpConfigUsecase {
+class SetupNetworkConfigUsecase {
   final yamlWriter = YamlWriter(toEncodable: (object) => object.toString());
 
-  ConfigResult? start(
+  ConfigResult start(
     int fiber,
     int lambda,
     double offeredLoad,
@@ -33,22 +33,20 @@ class SetupExpConfigUsecase {
         }
       }
     }
+    cables.shuffle();
+
     Logger.i.log('Total cables (link x fiber x lambda): ${cables.length}');
     Logger.i.log('Offered Load: $offeredLoad');
     final lastIndex = cables.length - 1;
     final usedCount = (offeredLoad * lastIndex).floor();
-    cables.shuffle();
     final availableLink = cables.sublist(usedCount);
-    Logger.i.log('Available Link:\n${yamlWriter.write(availableLink)}');
 
-    final nodes = circlesMap.values.map(Node.fromCircle).toList()..shuffle();
-    Logger.i.log('Communication: ${nodes[0]} to ${nodes[1]}');
+    Logger.i.log('Available Link:\n${yamlWriter.write(availableLink)}');
+    final nodes = circlesMap.values.map(Node.fromCircle).toList();
 
     return ConfigResult(
       availableLink: availableLink,
       nodes: nodes,
-      start: nodes[0],
-      end: nodes[1],
     );
   }
 }
@@ -56,12 +54,9 @@ class SetupExpConfigUsecase {
 class ConfigResult {
   final List<Link> availableLink;
   final List<Node> nodes;
-  final Node start, end;
 
   ConfigResult({
     required this.availableLink,
     required this.nodes,
-    required this.start,
-    required this.end,
   });
 }
