@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-class Link {
+class LightPath {
   final int source, target;
   final int fiber, lambda;
 
-  const Link({
+  const LightPath({
     required this.source,
     required this.target,
     required this.fiber,
@@ -12,7 +12,7 @@ class Link {
   });
 
   @override
-  bool operator ==(covariant Link other) {
+  bool operator ==(covariant LightPath other) {
     return source == other.source &&
         target == other.target &&
         fiber == other.fiber &&

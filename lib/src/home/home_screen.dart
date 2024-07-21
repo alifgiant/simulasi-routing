@@ -73,9 +73,26 @@ class HomeView extends StatelessWidget {
               children: [
                 const Text('Pengaturan', style: TextStyle(fontSize: 21)),
                 const SizedBox(height: 4),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Durasi Simulasi (detik)'),
+                  trailing: Text(
+                    controller.experimentDuration.toString(),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                Slider(
+                  value: controller.experimentDuration.toDouble(),
+                  min: 0,
+                  max: 240,
+                  divisions: 24,
+                  onChanged: controller.changeExperimentDuration,
+                ),
+                const SizedBox(height: 12),
                 ExpansionTile(
                   title: const Text('Koneksi'),
                   tilePadding: EdgeInsets.zero,
+                  initiallyExpanded: true,
                   children: [
                     const SizedBox(height: 4),
                     TextField(
@@ -92,7 +109,7 @@ class HomeView extends StatelessWidget {
                   ],
                 ),
                 ExpansionTile(
-                  title: const Text('Konfigurasi'),
+                  title: const Text('Parameter'),
                   tilePadding: EdgeInsets.zero,
                   children: [
                     const SizedBox(height: 4),
@@ -128,7 +145,7 @@ class HomeView extends StatelessWidget {
                     ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Beban'),
+                      title: const Text('Beban Jaringan'),
                       trailing: Text(
                         controller.offeredLoad.toString(),
                         style: const TextStyle(fontSize: 16),
@@ -141,7 +158,9 @@ class HomeView extends StatelessWidget {
                     ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Durasi Hold Ligth-path (detik)'),
+                      title: const Text(
+                        'Rata-rata waktu penggunaan jalur (detik)',
+                      ),
                       trailing: Text(
                         controller.holdingTime.toString(),
                         style: const TextStyle(fontSize: 16),
@@ -149,7 +168,7 @@ class HomeView extends StatelessWidget {
                     ),
                     Slider(
                       value: controller.holdingTime.toDouble(),
-                      min: 0,
+                      min: 1,
                       max: 20,
                       divisions: 10,
                       onChanged: controller.changeHoldTime,
@@ -160,22 +179,6 @@ class HomeView extends StatelessWidget {
               ],
             ),
           ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Durasi Simulasi (detik)'),
-            trailing: Text(
-              controller.experimentDuration.toString(),
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-          Slider(
-            value: controller.experimentDuration.toDouble(),
-            min: 0,
-            max: 240,
-            divisions: 24,
-            onChanged: controller.changeExperimentDuration,
-          ),
-          const SizedBox(height: 12),
           FilledButton(
             onPressed: controller.onStartSimulation,
             style: FilledButton.styleFrom(

@@ -138,7 +138,7 @@ class HomeController extends ChangeNotifier {
     );
 
     Logger.i.log('======================================', showDate: false);
-    final validationResult = validateParamUsecase.start(
+    final expParam = validateParamUsecase.start(
       fiberCount,
       lambdaCount,
       offeredLoad,
@@ -147,22 +147,20 @@ class HomeController extends ChangeNotifier {
       circlesMap,
     );
 
-    if (validationResult == null) return;
+    if (expParam == null) return;
 
-    final config = setupNetworkConfigUsecase.start(
-      fiber: validationResult.fiberCount,
-      lambda: validationResult.lambdaCount,
-      holdTime: validationResult.holdTime,
-      offeredLoad: validationResult.offeredLoad,
+    final networkConfig = setupNetworkConfigUsecase.start(
+      fiberCount: expParam.fiberCount,
+      lambdaCount: expParam.lambdaCount,
       circlesMap: circlesMap,
       linksMap: linksMap,
     );
 
     Logger.i.log('Experiment Started ...');
-    final nodes = config.nodes..shuffle();
-    Logger.i.log('Communication from ${nodes[0]} to ${nodes[1]}');
+    // final nodes = networkConfig.nodes..shuffle();
+    // Logger.i.log('Communication from ${nodes[0]} to ${nodes[1]}');
     Logger.i.log('Step 1: Construction of pre-defined paths');
-    routeFinderUsecase.start(config);
+    routeFinderUsecase.start(networkConfig);
     Logger.i.log('Step 2: Collecting information by signaling');
     Logger.i.log('Step 3: Route and wavelength selection');
     //

@@ -26,14 +26,6 @@ class ValidateParamUsecase {
       return null;
     }
 
-    if (offeredLoad == 1) {
-      EasyLoading.showError(
-        'Tidak bisa menjalankan simulasi, atur beban dibawah 1',
-      );
-      Logger.i.log('Error offeredLoad == 1');
-      return null;
-    }
-
     if (holdTime <= 0) {
       EasyLoading.showError(
         'Tidak bisa menjalankan simulasi, atur waktu tinggu lebih besar dari 0',
@@ -47,37 +39,47 @@ class ValidateParamUsecase {
       return null;
     }
 
-    Logger.i.log(
-      'Simulation Parameter is valid\n${defaultYamlWriter.write(
-        {
-          'fiberCount': fiberCount,
-          'lambdaCount': lambdaCount,
-          'offeredLoad': offeredLoad,
-          'holdTime': '${holdTime}s',
-          'experimentDuration': '${experimentDuration}s',
-        },
-      )}',
-    );
-
-    return ExperimentParams(
+    final params = ExperimentParams(
       fiberCount: fiberCount,
       lambdaCount: lambdaCount,
       offeredLoad: offeredLoad,
       holdTime: holdTime,
       experimentDuration: experimentDuration,
     );
+
+    Logger.i.log(
+      'Simulation Parameter is valid\n${defaultYamlWriter.write(params)}',
+    );
+
+    return params;
   }
 }
 
 class ExperimentParams {
   final int fiberCount, lambdaCount, holdTime, experimentDuration;
-  final double offeredLoad, rateOfRequest;
+  final double offeredLoad;
+  late final double rateOfRequest;
 
-  const ExperimentParams({
+  ExperimentParams({
     required this.fiberCount,
     required this.lambdaCount,
     required this.offeredLoad,
     required this.holdTime,
     required this.experimentDuration,
-  }) : rateOfRequest = offeredLoad * fiberCount * lambdaCount / holdTime;
+  }) {
+    const precision = 1000;
+    final realRate = offeredLoad * fiberCount * lambdaCount / holdTime;
+    rateOfRequest = (realRate * precision).floorToDouble() / precision;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'Fiber Count': fiberCount,
+      'Wavelength Count in a Fiber': lambdaCount,
+      'Offered load': offeredLoad,
+      'Mean Hold Time each connection': '${holdTime}s',
+      'Rate Request / second (λ)': '$rateOfRequest/s',
+      'Experiment Duration': '${experimentDuration}s',
+    };
+  }
 }
