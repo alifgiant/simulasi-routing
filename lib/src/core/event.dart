@@ -12,6 +12,11 @@ class LightPathRequest extends Event {
     required this.id,
     required this.holdTime,
   });
+
+  @override
+  String toString() {
+    return 'LightPathRequest(id:$id)';
+  }
 }
 
 class ProbRequest extends Event {

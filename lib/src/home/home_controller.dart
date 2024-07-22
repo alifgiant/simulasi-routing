@@ -171,6 +171,7 @@ class HomeController extends ChangeNotifier {
     );
 
     await experimentUsecase.start(routingMap, expParam);
+    Logger.i.log('End: Simulation finished');
 
     EasyLoading.showSuccess('Simulation Finished');
   }

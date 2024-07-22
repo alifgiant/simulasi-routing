@@ -31,8 +31,12 @@ class NodeRunner {
 
       // Generate holding time using exponential distribution (in seconds)
       double holdingTime = -expParam.holdTime * log(1 - _random.nextDouble());
+      final lightPathRequest = LightPathRequest(
+        id: requestIndex,
+        holdTime: holdingTime,
+      );
       Logger.i.log(
-        '$node - Request $requestIndex incoming in ${interArrivalTime}s and active for ${expParam.holdTime}s',
+        '$node - $lightPathRequest incoming in ${interArrivalTime}s',
       );
 
       // Wait for the inter-arrival time, convert [interArrivalTime]s to microsecond for accuracy
@@ -40,7 +44,7 @@ class NodeRunner {
         microseconds: (interArrivalTime * 1000000).round(),
       ));
 
-      yield LightPathRequest(id: requestIndex, holdTime: holdingTime);
+      yield lightPathRequest;
       requestIndex += 1;
     }
   }
