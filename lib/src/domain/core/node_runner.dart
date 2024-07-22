@@ -14,14 +14,20 @@ final Random _random = Random();
 
 class NodeRunner {
   final Node node;
+  final Map<int, Node> nodeMap;
 
-  NodeRunner({required this.node});
+  NodeRunner({
+    required this.node,
+    required this.nodeMap,
+  });
 
   final StreamController<Event> _streamController = StreamController();
 
   StreamSubscription<Event>? _listener;
 
-  Stream<LightPathRequest> generateRequests(ExperimentParams expParam) async* {
+  void sentEvent(Event event) => _streamController.add(event);
+
+  Stream<LightPathRequest> _generateRequests(ExperimentParams expParam) async* {
     Logger.i.log('Request generator for $node is started');
     int requestIndex = 1;
     while (true) {
@@ -49,12 +55,10 @@ class NodeRunner {
     }
   }
 
-  void sentEvent(Event event) => _streamController.add(event);
-
   void run(ExperimentParams expParam) {
     _listener = StreamGroup.merge([
       _streamController.stream,
-      generateRequests(expParam),
+      _generateRequests(expParam),
     ]).listen(
       (req) {
         Logger.i.log('$node - event received $req');
@@ -74,7 +78,26 @@ class NodeRunner {
   }
 
   Future<void> onLightPathRequest(LightPathRequest req) async {
-    // Logger.i.log('Step 2: Collecting information by signaling');
+    Logger.i.log('Step 2 - $node: Collecting information by signaling');
+    final otherIds = nodeMap.keys.where((key) => key != node.id);
+    final targetId = otherIds.elementAt(_random.nextInt(otherIds.length));
+    final routeOptions = node.routingMap[targetId];
+    if (routeOptions == null) {
+      Logger.i.log('ERROR: route option from $node to $otherIds is not found');
+      return;
+    }
+
+    for (var routes in routeOptions) {
+      final probReq = ProbRequest(
+        sourceId: node.id,
+        targetId: targetId,
+        route: routes,
+        totalRouteCount: routeOptions.length,
+        linkInfo: {},
+      );
+      // routes.routes.iterator
+    }
+
     // // send prob signal
     // Logger.i.log('Step 3: Route and wavelength selection');
     // send signal

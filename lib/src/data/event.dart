@@ -22,13 +22,16 @@ class LightPathRequest extends Event {
 class ProbRequest extends Event {
   final int sourceId, targetId;
   final RouteInfo route;
+  final int totalRouteCount;
+  final Map<int, Map<int, Map<int, bool>>> linkInfo;
 
   ProbRequest({
     required this.sourceId,
     required this.targetId,
     required this.route,
+    required this.totalRouteCount,
+    required this.linkInfo,
   });
-  // final List<LightPath> i;
 }
 
 class ResvRequest extends Event {

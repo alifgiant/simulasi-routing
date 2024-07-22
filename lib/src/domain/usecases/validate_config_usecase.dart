@@ -43,7 +43,7 @@ class ValidateParamUsecase {
 
 class ExperimentParams {
   final int fiberCount, lambdaCount, holdTime, experimentDuration;
-  final double offeredLoad;
+  final double offeredLoad; // rho
   late final double rateOfRequest;
 
   ExperimentParams({

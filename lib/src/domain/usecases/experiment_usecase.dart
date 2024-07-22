@@ -9,7 +9,10 @@ class ExperimentUsecase {
     ExperimentParams expParam,
   ) async {
     final nodeRunners = routingMap.map(
-      (key, value) => MapEntry(key, NodeRunner(node: value)),
+      (key, value) => MapEntry(
+        key,
+        NodeRunner(node: value, nodeMap: routingMap),
+      ),
     );
     for (var node in nodeRunners.values) {
       node.run(expParam);

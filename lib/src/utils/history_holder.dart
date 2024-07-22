@@ -14,5 +14,21 @@ class HistoryHolder extends ChangeNotifier {
   void clear() {
     _logs.clear();
     notifyListeners();
+
+    SimulationReporter.i.clear();
+  }
+}
+
+class SimulationReporter {
+  SimulationReporter._();
+
+  static final i = SimulationReporter._();
+
+  int noRouteFoundReq = 0, successRouteReq = 0, blockedRouteReq = 0;
+
+  void clear() {
+    noRouteFoundReq = 0;
+    successRouteReq = 0;
+    blockedRouteReq = 0;
   }
 }
