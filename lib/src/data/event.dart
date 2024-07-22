@@ -1,4 +1,4 @@
-import 'package:routing_nanda/src/core/node.dart';
+import 'package:routing_nanda/src/domain/core/node.dart';
 
 sealed class Event {
   const Event();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-import 'src/home/home_screen.dart';
+import 'src/view/home/home_screen.dart';
 
 void main() {
   runApp(const MyApp());

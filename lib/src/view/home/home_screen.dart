@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:routing_nanda/src/core/vm.dart';
-import 'package:routing_nanda/src/history/history_screen.dart';
-import 'package:routing_nanda/src/home/home_controller.dart';
-import 'package:routing_nanda/src/usecases/experiment_usecase.dart';
-import 'package:routing_nanda/src/usecases/route_finder_usecase.dart';
+import 'package:routing_nanda/src/domain/core/vm.dart';
+import 'package:routing_nanda/src/view/history/history_screen.dart';
+import 'package:routing_nanda/src/view/home/home_controller.dart';
+import 'package:routing_nanda/src/domain/usecases/experiment_usecase.dart';
+import 'package:routing_nanda/src/domain/usecases/route_finder_usecase.dart';
 
-import '../core/circle_data.dart';
-import '../core/line_painter.dart';
-import '../usecases/setup_exp_config_usecase.dart';
-import '../usecases/validate_config_usecase.dart';
+import '../../data/circle_data.dart';
+import '../../utils/line_painter.dart';
+import '../../domain/usecases/setup_exp_config_usecase.dart';
+import '../../domain/usecases/validate_config_usecase.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:routing_nanda/src/core/circle_data.dart';
+import 'package:routing_nanda/src/data/circle_data.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
-import '../usecases/experiment_usecase.dart';
-import '../usecases/route_finder_usecase.dart';
-import '../usecases/setup_exp_config_usecase.dart';
-import '../usecases/validate_config_usecase.dart';
-import '../utils/debouncer.dart';
+import '../../domain/usecases/experiment_usecase.dart';
+import '../../domain/usecases/route_finder_usecase.dart';
+import '../../domain/usecases/setup_exp_config_usecase.dart';
+import '../../domain/usecases/validate_config_usecase.dart';
+import '../../utils/debouncer.dart';
 
 class HomeController extends ChangeNotifier {
   final Map<int, CircleData> circlesMap = {};

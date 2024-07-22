@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'circle_data.dart';
+import '../data/circle_data.dart';
 
 class LinePainter extends CustomPainter {
   final Map<int, CircleData> circles;

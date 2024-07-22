@@ -1,4 +1,4 @@
-import 'package:routing_nanda/src/core/circle_data.dart';
+import 'package:routing_nanda/src/data/circle_data.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
 class SetupNetworkConfigUsecase {

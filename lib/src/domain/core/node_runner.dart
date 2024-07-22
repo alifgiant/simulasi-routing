@@ -3,11 +3,11 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:async/async.dart';
-import 'package:routing_nanda/src/usecases/validate_config_usecase.dart';
+import 'package:routing_nanda/src/domain/usecases/validate_config_usecase.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 import 'package:routing_nanda/src/utils/utils.dart';
 
-import 'event.dart';
+import '../../data/event.dart';
 import 'node.dart';
 
 final Random _random = Random();
