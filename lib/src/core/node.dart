@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/foundation.dart';
 
 import 'circle_data.dart';
@@ -37,55 +35,6 @@ class Node {
   @override
   String toString() => 'Node($id)';
 
-  /// run BFS to all node then save it to [routingMap]
-  void setupRouteMap(
-    Map<int, Set<int>> combinedLink,
-    Set<int> allNodeId,
-  ) {
-    Set<int> visitedNode = {id};
-
-    Queue<WalkPlan> walkPlanQueue = Queue.of((combinedLink[id] ?? {}).map(
-      (e) => WalkPlan(trail: {}, next: e),
-    ));
-    if (walkPlanQueue.isEmpty) return;
-
-    while (walkPlanQueue.isNotEmpty) {
-      final plan = walkPlanQueue.removeFirst();
-      if (visitedNode.contains(plan.next)) continue;
-
-      // mark visited
-      visitedNode.add(plan.next);
-
-      // get previous mapped route and add new found route
-      final prevRoutes = routingMap[plan.next] ?? {};
-      prevRoutes.add(RouteInfo(routes: plan.trail));
-      routingMap[plan.next] = prevRoutes;
-
-      // try setup alternative route
-      final completePath = {id, ...plan.trail, plan.next}.toList();
-      final newCombinedLink = {
-        for (final entry in combinedLink.entries) entry.key: entry.value.toSet()
-      };
-      for (int i = 0; i < completePath.length - 1; i++) {
-        newCombinedLink[completePath[i]]?.remove(completePath[i + 1]);
-      }
-
-      setupRouteMap(newCombinedLink, allNodeId);
-
-      // add new walk plan to queue
-      final links = combinedLink[plan.next];
-      if (links == null) continue;
-      walkPlanQueue.addAll(
-        links.map(
-          (e) => WalkPlan(
-            trail: {...plan.trail, plan.next},
-            next: e,
-          ),
-        ),
-      );
-    }
-  }
-
   Map<String, dynamic> toJson() {
     return {
       toString(): {
@@ -116,17 +65,4 @@ class RouteInfo {
   bool operator ==(covariant RouteInfo other) {
     return setEquals(routes, other.routes);
   }
-}
-
-class WalkPlan {
-  final Set<int> trail;
-  final int next;
-
-  const WalkPlan({
-    required this.trail,
-    required this.next,
-  });
-
-  @override
-  String toString() => 'next:$next, trail:$trail';
 }

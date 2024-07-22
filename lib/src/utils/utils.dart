@@ -22,3 +22,12 @@ extension StringExt on String {
       ..click();
   }
 }
+
+extension MapRouteExt on Map<int, Set<int>> {
+  Map<int, Set<int>> deepCopy() {
+    final copiedMap = {
+      for (var entry in entries) entry.key: Set.of(entry.value),
+    };
+    return copiedMap;
+  }
+}
