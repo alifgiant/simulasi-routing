@@ -22,23 +22,20 @@ class NodeRunner {
     Logger.i.log('Request generator for $node is started');
     int requestIndex = 1;
     while (true) {
-      // Generate inter-arrival time using exponential distribution
+      // Generate inter-arrival time using exponential distribution (in seconds)
       double u = _random.nextDouble();
       double interArrivalTime = -log(1 - u) / expParam.rateOfRequest;
-      Logger.i.log(
-        '$node-$requestIndex-interArrivalTime: $interArrivalTime >> rateOfRequest: ${expParam.rateOfRequest}',
-      );
 
-      // Wait for the inter-arrival time
-      await Future.delayed(
-        Duration(microseconds: (interArrivalTime * 1000000).round()),
-      );
-
-      // Generate holding time using exponential distribution
+      // Generate holding time using exponential distribution (in seconds)
       double holdingTime = -expParam.holdTime * log(1 - _random.nextDouble());
       Logger.i.log(
-        '$node-$requestIndex-holdingTime: $interArrivalTime >> holdTime: ${expParam.holdTime}',
+        '$node - Request $requestIndex incoming in ${interArrivalTime}s and active for ${expParam.holdTime}s',
       );
+
+      // Wait for the inter-arrival time, convert [interArrivalTime]s to microsecond for accuracy
+      await Future.delayed(Duration(
+        microseconds: (interArrivalTime * 1000000).round(),
+      ));
 
       yield LightPathRequest(id: requestIndex, holdTime: holdingTime);
       requestIndex += 1;
@@ -48,9 +45,11 @@ class NodeRunner {
   void run(ExperimentParams expParam) {
     listener = generateRequests(expParam).listen(
       (req) {
-        Logger.i.log('Lightpath request ${req.id} received');
+        Logger.i.log('$node - request ${req.id} processed');
         Logger.i.log('Step 2: Collecting information by signaling');
+        // send prob signal
         Logger.i.log('Step 3: Route and wavelength selection');
+        // send signal
       },
     );
   }
