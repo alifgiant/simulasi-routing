@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
-import 'package:routing_nanda/src/core/simulation_notifier.dart';
 
 import 'circle_data.dart';
 
@@ -13,10 +12,27 @@ class Node {
     required this.id,
     Map<int, Set<RouteInfo>>? routingMap,
   }) : routingMap = routingMap ?? {};
+  //{
+  // final lightpaths = <LightPath>[];
+  // for (var connection in linksMap.entries) {
+  //   final source = connection.key;
+  //   final targets = connection.value;
+  //   for (var target in targets) {
+  //     for (var fiberI = 0; fiberI < fiberCount; fiberI++) {
+  //       for (var lambdaI = 0; lambdaI < lambdaCount; lambdaI++) {
+  //         lightpaths.add(LightPath(
+  //           source: source,
+  //           target: target,
+  //           fiber: fiberI,
+  //           lambda: lambdaI,
+  //         ));
+  //       }
+  //     }
+  //   }
+  //  }
+  // }
 
-  Node.fromCircle(CircleData circle)
-      : id = circle.id,
-        routingMap = {};
+  factory Node.fromCircle(CircleData circle) => Node(id: circle.id);
 
   @override
   String toString() => 'Node($id)';
@@ -67,21 +83,6 @@ class Node {
           ),
         ),
       );
-    }
-  }
-
-  void startExperiment() {
-    SimulationNotifier.i.addListener(onSimulationEvent);
-  }
-
-  void onSimulationEvent() {
-    switch (SimulationNotifier.i.isRunning) {
-      case false:
-        SimulationNotifier.i.removeListener(onSimulationEvent);
-        break;
-      case true:
-        // do nothing
-        break;
     }
   }
 

@@ -134,8 +134,9 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onStartSimulation() {
+  Future<void> onStartSimulation() async {
     EasyLoading.show(
+      status: 'Simulation Running',
       dismissOnTap: false,
       maskType: EasyLoadingMaskType.black,
     );
@@ -159,18 +160,14 @@ class HomeController extends ChangeNotifier {
       linksMap: linksMap,
     );
 
-    Logger.i.log('Experiment Started ...');
+    Logger.i.log(
+      'Experiment Started, will repeat Step 2 and 3 for ${expParam.experimentDuration}s ...',
+    );
     Logger.i.log('Step 1: Construction of pre-defined paths');
     final routingMap = routeFinderUsecase.start(networkConfig);
 
-    Logger.i.log('Step 2: Collecting information by signaling');
-    experimentUsecase.start(routingMap);
+    await experimentUsecase.start(routingMap, expParam);
 
-    // final nodes = networkConfig.nodes..shuffle();
-    // Logger.i.log('Communication from ${nodes[0]} to ${nodes[1]}');
-    Logger.i.log('Step 3: Route and wavelength selection');
-    //
-
-    EasyLoading.dismiss();
+    EasyLoading.showSuccess('Simulation Finished');
   }
 }

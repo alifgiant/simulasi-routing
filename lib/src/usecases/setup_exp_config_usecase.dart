@@ -11,19 +11,25 @@ class SetupNetworkConfigUsecase {
   }) {
     Logger.i.log('Configuring Network ...');
 
-    final lightpaths = <LightPath>[];
+    final lightpaths = <String, LightPath>{};
     for (var connection in linksMap.entries) {
       final source = connection.key;
       final targets = connection.value;
       for (var target in targets) {
         for (var fiberI = 0; fiberI < fiberCount; fiberI++) {
           for (var lambdaI = 0; lambdaI < lambdaCount; lambdaI++) {
-            lightpaths.add(LightPath(
+            lightpaths['$source:$target:$fiberI:$lambdaI'] = LightPath(
               source: source,
               target: target,
               fiber: fiberI,
               lambda: lambdaI,
-            ));
+            );
+            // lightpaths.add(LightPath(
+            //   source: source,
+            //   target: target,
+            //   fiber: fiberI,
+            //   lambda: lambdaI,
+            // ));
           }
         }
       }
@@ -58,7 +64,7 @@ class SetupNetworkConfigUsecase {
 }
 
 class ConfigResult {
-  final List<LightPath> lightpaths;
+  final Map<String, LightPath> lightpaths;
   final Map<int, CircleData> circlesMap;
   final Map<int, Set<int>> linksMap;
   final Map<int, Set<int>> reversedLinksMap;

@@ -19,6 +19,12 @@ class ValidateParamUsecase {
       return null;
     }
 
+    if (experimentDuration == 0) {
+      EasyLoading.showError('Tidak bisa menjalankan simulasi selama 0s');
+      Logger.i.log('Error experiment duration == 0');
+      return null;
+    }
+
     final params = ExperimentParams(
       fiberCount: fiberCount,
       lambdaCount: lambdaCount,
