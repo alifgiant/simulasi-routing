@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:async/async.dart';
 import 'package:routing_nanda/src/usecases/validate_config_usecase.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 import 'package:routing_nanda/src/utils/utils.dart';
 
-import 'light_path.dart';
+import 'event.dart';
 import 'node.dart';
 
 final Random _random = Random();
@@ -16,7 +17,9 @@ class NodeRunner {
 
   NodeRunner({required this.node});
 
-  StreamSubscription<LightPathRequest>? listener;
+  final StreamController<Event> _streamController = StreamController();
+
+  StreamSubscription<Event>? _listener;
 
   Stream<LightPathRequest> generateRequests(ExperimentParams expParam) async* {
     Logger.i.log('Request generator for $node is started');
@@ -42,58 +45,88 @@ class NodeRunner {
     }
   }
 
+  void sentEvent(Event event) => _streamController.add(event);
+
   void run(ExperimentParams expParam) {
-    listener = generateRequests(expParam).listen(
+    _listener = StreamGroup.merge([
+      _streamController.stream,
+      generateRequests(expParam),
+    ]).listen(
       (req) {
-        Logger.i.log('$node - request ${req.id} processed');
-        Logger.i.log('Step 2: Collecting information by signaling');
-        // send prob signal
-        Logger.i.log('Step 3: Route and wavelength selection');
-        // send signal
+        Logger.i.log('$node - event received $req');
+        switch (req) {
+          case LightPathRequest():
+            onLightPathRequest(req);
+            break;
+          case ProbRequest():
+            onProbRequest(req);
+            break;
+          case ResvRequest():
+            onResvRequest(req);
+            break;
+        }
       },
     );
   }
 
+  Future<void> onLightPathRequest(LightPathRequest req) async {
+    // Logger.i.log('Step 2: Collecting information by signaling');
+    // // send prob signal
+    // Logger.i.log('Step 3: Route and wavelength selection');
+    // send signal
+  }
+
+  Future<void> onProbRequest(ProbRequest req) async {
+    //
+  }
+
+  Future<void> onResvRequest(ResvRequest req) async {
+    //
+  }
+
   void stop() {
-    listener?.cancel();
+    _listener?.cancel();
+    _streamController.close();
   }
 }
 
 class NodeMapper {
-  final Node node;
+  final int nodeId;
 
-  const NodeMapper({required this.node});
+  const NodeMapper({required this.nodeId});
 
   /// run BFS to all node then save it to [routingMap]
-  Node setupRouteMap(
+  Map<int, Set<RouteInfo>> setupRouteMap(
     Set<int> allNodeId,
     Map<int, Set<int>> combinedLink,
   ) {
+    Map<int, Set<RouteInfo>> routingMap = {};
+
     // other node ids that want to be routed
-    final idsExcCurrent = Set.of(allNodeId)..remove(node.id);
+    final idsExcCurrent = Set.of(allNodeId)..remove(nodeId);
 
     for (var otherNodeId in idsExcCurrent) {
-      Logger.i.log('creating predefined route from $node to $otherNodeId');
+      Logger.i.log('creating predefined route from $nodeId to $otherNodeId');
 
-      final routes = findShortedRouteTo(
+      final routes = _findShortedRouteTo(
         otherNodeId,
         combinedLink.deepCopy(),
       );
-      node.routingMap[otherNodeId] = routes;
+      routingMap[otherNodeId] = routes;
     }
 
-    return node;
+    return routingMap;
   }
 
   /// run BFS to find route to [otherNodeId]
   /// will recursively find alternative route if a route found by removing found route
-  Set<RouteInfo> findShortedRouteTo(
+  Set<RouteInfo> _findShortedRouteTo(
     int otherNodeId,
     Map<int, Set<int>> combinedLink,
   ) {
-    Set<int> visitedNode = {node.id};
+    Set<int> visitedNode = {nodeId};
 
-    Queue<WalkPlan> walkPlanQueue = Queue.of((combinedLink[node.id] ?? {}).map(
+    Queue<WalkPlan> walkPlanQueue = Queue.of((combinedLink[nodeId] ?? {}).map(
       (e) => WalkPlan(trail: {}, next: e),
     ));
 
@@ -117,12 +150,12 @@ class NodeMapper {
 
         // remove found route from [newCombinedLink] to try find another route
         final newCombinedLink = combinedLink.deepCopy();
-        final completePath = List.from({node.id, ...plan.trail, visitedId});
+        final completePath = List.from({nodeId, ...plan.trail, visitedId});
         for (int i = 0; i < completePath.length - 1; i++) {
           newCombinedLink[completePath[i]]?.remove(completePath[i + 1]);
         }
         // find another route
-        final anotherRoute = findShortedRouteTo(otherNodeId, newCombinedLink);
+        final anotherRoute = _findShortedRouteTo(otherNodeId, newCombinedLink);
 
         // return all found route to [otherNodeId]
         return {
@@ -143,6 +176,25 @@ class NodeMapper {
 
     // if no more plan to walk, then no route is found
     return {};
+  }
+
+  Map<int, Map<int, Map<int, bool>>> setupLinkMap(
+    Map<int, Set<int>> combinedLinks,
+    int fiberCount,
+    int lambdaCount,
+  ) {
+    final links = combinedLinks[nodeId];
+    if (links == null || links.isEmpty) return {};
+
+    return {
+      for (var linkId in links)
+        linkId: {
+          for (int f = 0; f < fiberCount; f++)
+            f: {
+              for (int w = 0; w < lambdaCount; w++) w: false,
+            },
+        },
+    };
   }
 }
 

@@ -5,7 +5,11 @@ import 'package:routing_nanda/src/utils/logger.dart';
 import 'package:routing_nanda/src/utils/utils.dart';
 
 class RouteFinderUsecase {
-  Map<int, Node> start(ConfigResult config) {
+  Map<int, Node> start(
+    ConfigResult config,
+    int fiberCount,
+    int lambdaCount,
+  ) {
     final nodes = config.circlesMap.map(
       (key, value) {
         // combine forward and backward link
@@ -16,14 +20,21 @@ class RouteFinderUsecase {
             ...entry.value,
           };
         }
-
-        Node node = Node.fromCircle(value);
-        node = NodeMapper(node: node).setupRouteMap(
+        final nodeMapper = NodeMapper(nodeId: value.id);
+        final routeMap = nodeMapper.setupRouteMap(
           config.circlesMap.keys.toSet(),
           combinedLinks,
         );
+        final linkMap = nodeMapper.setupLinkMap(
+          combinedLinks,
+          fiberCount,
+          lambdaCount,
+        );
 
-        return MapEntry(key, node);
+        return MapEntry(
+          key,
+          Node(id: value.id, routingMap: routeMap, linkInfo: linkMap),
+        );
       },
     );
     Logger.i.log('pre-defined paths:\n${yamlWriter.write(

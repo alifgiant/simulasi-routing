@@ -1,36 +1,35 @@
 import 'package:flutter/foundation.dart';
 
-import 'circle_data.dart';
-
 class Node {
   final int id;
+
+  /// {
+  ///    Node_Target : RouteInfo{
+  ///       {1 -> 2 -> 3},
+  ///       {1 -> 2}
+  ///    }
+  /// }
   final Map<int, Set<RouteInfo>> routingMap;
+
+  /// {
+  ///    Node_Target : {
+  ///       fiber_id : {
+  ///           wave_id : True,   // free/available
+  ///           wave_id2 : False, // used
+  ///       },
+  ///       fiber_id2 : {
+  ///           wave_id : True,   // free/available
+  ///           wave_id2 : False, // used
+  ///       },
+  ///    }
+  /// }
+  final Map<int, Map<int, Map<int, bool>>> linkInfo;
 
   Node({
     required this.id,
-    Map<int, Set<RouteInfo>>? routingMap,
-  }) : routingMap = routingMap ?? {};
-  //{
-  // final lightpaths = <LightPath>[];
-  // for (var connection in linksMap.entries) {
-  //   final source = connection.key;
-  //   final targets = connection.value;
-  //   for (var target in targets) {
-  //     for (var fiberI = 0; fiberI < fiberCount; fiberI++) {
-  //       for (var lambdaI = 0; lambdaI < lambdaCount; lambdaI++) {
-  //         lightpaths.add(LightPath(
-  //           source: source,
-  //           target: target,
-  //           fiber: fiberI,
-  //           lambda: lambdaI,
-  //         ));
-  //       }
-  //     }
-  //   }
-  //  }
-  // }
-
-  factory Node.fromCircle(CircleData circle) => Node(id: circle.id);
+    required this.routingMap,
+    required this.linkInfo,
+  });
 
   @override
   String toString() => 'Node($id)';

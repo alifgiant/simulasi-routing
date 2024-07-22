@@ -164,7 +164,11 @@ class HomeController extends ChangeNotifier {
       'Experiment Started, will repeat Step 2 and 3 for ${expParam.experimentDuration}s ...',
     );
     Logger.i.log('Step 1: Construction of pre-defined paths');
-    final routingMap = routeFinderUsecase.start(networkConfig);
+    final routingMap = routeFinderUsecase.start(
+      networkConfig,
+      expParam.fiberCount,
+      expParam.lambdaCount,
+    );
 
     await experimentUsecase.start(routingMap, expParam);
 
