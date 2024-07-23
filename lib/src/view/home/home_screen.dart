@@ -199,14 +199,15 @@ class HomeView extends StatelessWidget {
                   context: context,
                   builder: (_) => Dialog(
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(12.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
                             'Simulation Result',
-                            style: TextStyle(fontWeight: FontWeight.w500),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 21),
                           ),
                           const SizedBox(height: 12),
                           ...reports.entries.map(
@@ -215,7 +216,7 @@ class HomeView extends StatelessWidget {
                           const SizedBox(height: 12),
                           Text(
                             'Blocking Probablity: $blockingProb',
-                            style: const TextStyle(fontWeight: FontWeight.w500),
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),

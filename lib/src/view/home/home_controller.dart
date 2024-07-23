@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:routing_nanda/src/data/circle_data.dart';
+import 'package:routing_nanda/src/utils/history_holder.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
 import '../../domain/usecases/experiment_usecase.dart';
@@ -172,6 +173,9 @@ class HomeController extends ChangeNotifier {
 
     await experimentUsecase.start(nodeMap, expParam);
     Logger.i.log('End: Simulation finished');
+    Logger.i.log('Simulation Result:\n${yamlWriter.write(
+      SimulationReporter.i.readReport(),
+    )}');
 
     EasyLoading.showSuccess('Simulation Finished');
   }

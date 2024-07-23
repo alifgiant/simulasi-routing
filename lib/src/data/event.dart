@@ -60,6 +60,10 @@ class ResvRequest extends Event {
     this.fromNodeId = -1,
     this.fromFiberIndex = -1,
   });
+
+  @override
+  String toString() =>
+      'ResvRequest(lightPathRequest:${lightPathRequest.id}, lambda:$selectedLambda,route:$route,)';
 }
 
 class ResvResult {
@@ -84,4 +88,8 @@ class ReleaseRequest extends Event {
   const ReleaseRequest({
     required this.lightPathRequest,
   });
+
+  @override
+  String toString() =>
+      'ReleaseRequest(lightPathRequest:${lightPathRequest.id})';
 }

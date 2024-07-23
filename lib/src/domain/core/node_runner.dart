@@ -26,13 +26,18 @@ class NodeRunner {
   })  : _genRandomTarget = genRandomTarget,
         _sentEvent = sentEvent;
 
-  final StreamController<Event> _streamController = StreamController();
+  StreamController<Event>? _streamController;
   final Map<LightPathRequest, Set<ProbRequest>> probRequestHolder = {};
   final Map<LightPathRequest, ResvResult> resvRequestHolder = {};
 
   StreamSubscription<Event>? _listener;
 
-  void receive(Event event) => _streamController.add(event);
+  void receive(Event event) {
+    final ctlr = _streamController;
+    if (ctlr == null || ctlr.isClosed) return;
+
+    ctlr.add(event);
+  }
 
   Stream<LightPathRequest> _generateRequests() async* {
     Logger.i.log('$node - Request generator is started');
@@ -62,8 +67,11 @@ class NodeRunner {
   }
 
   void run() {
+    final streamController = StreamController<Event>();
+    _streamController = streamController;
+
     _listener = StreamGroup.merge([
-      _streamController.stream,
+      streamController.stream,
       _generateRequests(),
     ]).listen(
       (req) {
@@ -418,6 +426,7 @@ class NodeRunner {
 
   void stop() {
     _listener?.cancel();
-    _streamController.close();
+    _streamController?.close();
+    _streamController = null;
   }
 }
