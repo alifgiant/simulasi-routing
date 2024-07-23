@@ -41,13 +41,14 @@ class ExperimentUsecase {
         key,
         NodeRunner(
           node: value,
+          expParam: expParam,
           genRandomTarget: genRandomTarget,
           sentEvent: sentEvent,
         ),
       ),
     );
     for (var node in nodeRunners.values) {
-      node.run(expParam);
+      node.run();
     }
 
     // let experiment run for as long as [experimentDuration]

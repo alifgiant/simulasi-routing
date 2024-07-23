@@ -65,6 +65,8 @@ class RouteOptions {
     required this.nodeIdSteps,
   });
 
+  int get length => nodeIdSteps.length;
+
   @override
   String toString() => nodeIdSteps.join('->');
 
@@ -92,10 +94,12 @@ class LinkInfo {
 
 class Fiber {
   final int fiberId;
-  final List<bool> lambdaAvailability;
+  final List<Availability> lambdaAvailability;
 
   const Fiber({
     required this.fiberId,
     required this.lambdaAvailability,
   });
 }
+
+enum Availability { used, free }

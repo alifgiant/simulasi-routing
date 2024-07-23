@@ -14,11 +14,13 @@ final Random _random = Random();
 
 class NodeRunner {
   final Node node;
+  final ExperimentParams expParam;
   final int Function(int from) _genRandomTarget;
   final void Function(int to, Event event) _sentEvent;
 
   NodeRunner({
     required this.node,
+    required this.expParam,
     required int Function(int from) genRandomTarget,
     required void Function(int to, Event event) sentEvent,
   })  : _genRandomTarget = genRandomTarget,
@@ -32,7 +34,7 @@ class NodeRunner {
 
   void receive(Event event) => _streamController.add(event);
 
-  Stream<LightPathRequest> _generateRequests(ExperimentParams expParam) async* {
+  Stream<LightPathRequest> _generateRequests() async* {
     Logger.i.log('$node - Request generator is started');
     int requestIndex = 1;
     while (true) {
@@ -59,10 +61,10 @@ class NodeRunner {
     }
   }
 
-  void run(ExperimentParams expParam) {
+  void run() {
     _listener = StreamGroup.merge([
       _streamController.stream,
-      _generateRequests(expParam),
+      _generateRequests(),
     ]).listen(
       (req) {
         Logger.i.log('$node - event received $req');
@@ -122,9 +124,7 @@ class NodeRunner {
         final processedReq = {probReq, ...savedReq};
         probRequestHolder.remove(probReq.lightPathRequest);
 
-        // send reserve signal
-        // select a fiber based on wavelenght and hold for a duration
-        Logger.i.log('processedReq: $processedReq');
+        _processProbReq(processedReq);
       } else {
         // not all request have arrive, store first to use later
         savedReq.add(probReq);
@@ -156,10 +156,12 @@ class NodeRunner {
       if (linkInfo == null) break;
 
       // find available fiber with given lambda
-      final indexedFibers = linkInfo.fibers.indexed.where(
-        (item) => item.$2.lambdaAvailability[req.selectedLambda],
+      final indexedFibers = linkInfo.fibers.indexed;
+      final indexedFreeFibers = indexedFibers.where(
+        (item) =>
+            item.$2.lambdaAvailability[req.selectedLambda] == Availability.free,
       );
-      if (indexedFibers.isEmpty) {
+      if (indexedFreeFibers.isEmpty) {
         // if fiber not available for given wavelength, thus blocked
         SimulationReporter.i.reportBlocked();
         Logger.i.log('Block detected for ${req.lightPathRequest}:${req.route}');
@@ -176,8 +178,8 @@ class NodeRunner {
         return;
       } else {
         // if fiber still available for given lambda, then
-        final randomSelect = _random.nextInt(indexedFibers.length);
-        toFiberIndex = indexedFibers.elementAt(randomSelect).$1;
+        final randomSelect = _random.nextInt(indexedFreeFibers.length);
+        toFiberIndex = indexedFreeFibers.elementAt(randomSelect).$1;
 
         // propagate resv request
         _sentEvent(
@@ -209,7 +211,7 @@ class NodeRunner {
       resvResult.fromNodeId,
       resvResult.fromFiberIndex,
       req.selectedLambda,
-      false,
+      Availability.used,
     );
 
     // use link : to
@@ -217,7 +219,7 @@ class NodeRunner {
       resvResult.toNodeId,
       resvResult.toFiberIndex,
       req.selectedLambda,
-      false,
+      Availability.used,
     );
 
     if (req.route.nodeIdSteps.first == node.id) {
@@ -246,7 +248,7 @@ class NodeRunner {
       reserveResult.fromNodeId,
       reserveResult.fromFiberIndex,
       reserveResult.resvRequest.selectedLambda,
-      true,
+      Availability.free,
     );
 
     // release link usage : to
@@ -254,7 +256,7 @@ class NodeRunner {
       reserveResult.toNodeId,
       reserveResult.toFiberIndex,
       reserveResult.resvRequest.selectedLambda,
-      true,
+      Availability.free,
     );
 
     // remove saved req
@@ -286,9 +288,130 @@ class NodeRunner {
     return next;
   }
 
-  void _changeLinkStatus(int nodeId, int fiberId, int lambdaId, bool status) {
+  void _changeLinkStatus(
+    int nodeId,
+    int fiberId,
+    int lambdaId,
+    Availability status,
+  ) {
     final toLinkInfo = node.linkInfo[nodeId];
     toLinkInfo?.fibers[fiberId].lambdaAvailability[lambdaId] = status;
+  }
+
+  void _processProbReq(Set<ProbRequest> processedReq) {
+    // send reserve signal
+    Logger.i.log('$node - Process ProbReq: $processedReq');
+    List<PathCost> pathCosts = calculatePathCost(processedReq);
+    if (pathCosts.isEmpty) {
+      // if path cost is empty, then no possible path to be open, thus blocked
+      SimulationReporter.i.reportBlocked();
+      Logger.i.log(
+        'Block detected for ${processedReq.first.lightPathRequest}:all-route',
+      );
+    } else if (pathCosts.length == 1) {
+      // if only one possible path
+      final pathCost = pathCosts.first;
+      _sentEvent(
+        node.id,
+        ResvRequest(
+          lightPathRequest: pathCost.lightPathRequest,
+          selectedLambda: pathCost.lambdaId,
+          route: pathCost.route,
+        ),
+      );
+      Logger.i.log(
+        '$node - ${processedReq.first.lightPathRequest} select lamda:${pathCost.lambdaId} route:${pathCost.route}',
+      );
+    } else {
+      // if more than one possible path, use one minimun cost
+      pathCosts.sort((a, b) {
+        final costCompared = a.cost.compareTo(b.cost);
+
+        // result != 0, means costs are different, sort by cost
+        if (costCompared != 0) return costCompared;
+
+        // result == 0, means costs are same, sort by hop
+        final hopCompared = a.route.length.compareTo(b.route.length);
+        return hopCompared;
+      });
+
+      PathCost selectedCost = pathCosts.first; // Minimum PathCost
+      final sameCosts = pathCosts.where(
+        (pathCost) =>
+            pathCost.cost == selectedCost.cost &&
+            pathCost.route.length == selectedCost.route.length,
+      );
+
+      // if not only one minimum cost
+      if (sameCosts.length != 1) {
+        final randomCostId = _random.nextInt(sameCosts.length);
+        selectedCost = sameCosts.elementAt(randomCostId);
+      }
+
+      _sentEvent(
+        node.id,
+        ResvRequest(
+          lightPathRequest: selectedCost.lightPathRequest,
+          selectedLambda: selectedCost.lambdaId,
+          route: selectedCost.route,
+        ),
+      );
+      Logger.i.log(
+        '$node - ${processedReq.first.lightPathRequest} select lamda:${selectedCost.lambdaId} route:${selectedCost.route}',
+      );
+    }
+  }
+
+  List<PathCost> calculatePathCost(Set<ProbRequest> processedReq) {
+    final pathCosts = <PathCost>[];
+    for (var probReq in processedReq) {
+      // for each route, represented by diff ProbReq
+      for (var lambdaId = 0; lambdaId < expParam.lambdaCount; lambdaId++) {
+        final hopCosts = probReq.linkInfo.values.map(
+          (e) {
+            final fiberCountWithUsedLambda = e.fibers
+                .where(
+                  (fiber) =>
+                      fiber.lambdaAvailability[lambdaId] == Availability.used,
+                )
+                .length;
+            if (fiberCountWithUsedLambda == e.fibers.length) {
+              return double.maxFinite;
+            }
+
+            final usedLambdaCount = e.fibers.fold(
+              0,
+              (prev, fiber) =>
+                  prev +
+                  fiber.lambdaAvailability
+                      .where((lambda) => lambda == Availability.used)
+                      .length,
+            );
+            final totalLamdaXFiber = expParam.fiberCount * expParam.lambdaCount;
+            return fiberCountWithUsedLambda *
+                usedLambdaCount /
+                totalLamdaXFiber;
+          },
+        );
+        final cost = hopCosts.any((cost) => cost == double.maxFinite)
+            ? double.maxFinite
+            : hopCosts.fold(0.0, (prev, cost) => prev + cost);
+
+        /// not need to add cost if it's maximum
+        if (cost == double.maxFinite) continue;
+
+        pathCosts.add(
+          PathCost(
+            lightPathRequest: probReq.lightPathRequest,
+            route: probReq.route,
+            lambdaId: lambdaId,
+            cost: cost,
+          ),
+        );
+      }
+    }
+
+    return pathCosts;
   }
 
   void stop() {

@@ -17,6 +17,20 @@ class LightPathRequest extends Event {
   String toString() => 'LightPathRequest(id:$id)';
 }
 
+class PathCost {
+  final LightPathRequest lightPathRequest;
+  final RouteOptions route;
+  final int lambdaId;
+  final double cost;
+
+  PathCost({
+    required this.lightPathRequest,
+    required this.route,
+    required this.lambdaId,
+    required this.cost,
+  });
+}
+
 class ProbRequest extends Event {
   final LightPathRequest lightPathRequest;
   final RouteOptions route;
