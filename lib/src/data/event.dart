@@ -6,7 +6,7 @@ sealed class Event {
 
 class LightPathRequest extends Event {
   final int id;
-  final double holdTime;
+  final double holdTime; // in seconds
 
   const LightPathRequest({
     required this.id,
@@ -65,9 +65,9 @@ class ResvResult {
 }
 
 class ReleaseRequest extends Event {
-  final ResvRequest resvRequest;
+  final LightPathRequest lightPathRequest;
 
   const ReleaseRequest({
-    required this.resvRequest,
+    required this.lightPathRequest,
   });
 }

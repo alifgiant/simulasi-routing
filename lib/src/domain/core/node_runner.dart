@@ -5,6 +5,7 @@ import 'package:async/async.dart';
 import 'package:routing_nanda/src/domain/usecases/validate_config_usecase.dart';
 import 'package:routing_nanda/src/utils/history_holder.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
+import 'package:routing_nanda/src/utils/utils.dart';
 
 import '../../data/event.dart';
 import 'node.dart';
@@ -25,7 +26,7 @@ class NodeRunner {
 
   final StreamController<Event> _streamController = StreamController();
   final Map<LightPathRequest, Set<ProbRequest>> probRequestHolder = {};
-  final Map<ResvRequest, ResvResult> resvRequestHolder = {};
+  final Map<LightPathRequest, ResvResult> resvRequestHolder = {};
 
   StreamSubscription<Event>? _listener;
 
@@ -51,9 +52,7 @@ class NodeRunner {
 
       // Wait for the inter-arrival time,
       // convert [interArrivalTime]s to microsecond for accuracy
-      await Future.delayed(Duration(
-        microseconds: (interArrivalTime * 1000000).round(),
-      ));
+      await Future.delayed(interArrivalTime.toMsDuration());
 
       yield lightPathRequest;
       requestIndex += 1;
@@ -110,7 +109,7 @@ class NodeRunner {
 
   Future<void> onProbRequest(ProbRequest probReq) async {
     if (probReq.route.nodeIdSteps.last == node.id) {
-      // req arrived in final destination
+      // if req arrived in final destination, try wavelength selection
       // access saved req if any
       final savedReq = probRequestHolder[probReq.lightPathRequest] ?? {};
 
@@ -156,69 +155,112 @@ class NodeRunner {
       final linkInfo = node.linkInfo[toNodeId];
       if (linkInfo == null) break;
 
+      // find available fiber with given lambda
       final indexedFibers = linkInfo.fibers.indexed.where(
         (item) => item.$2.lambdaAvailability[req.selectedLambda],
       );
-      final randomSelect = _random.nextInt(indexedFibers.length);
-      toFiberIndex = indexedFibers.elementAt(randomSelect).$1;
+      if (indexedFibers.isEmpty) {
+        // if fiber not available for given wavelength, thus blocked
+        SimulationReporter.i.reportBlocked();
 
-      // propagate resv request
-      _sentEvent(
-        toNodeId,
-        ResvRequest(
-          lightPathRequest: req.lightPathRequest,
-          selectedLambda: req.selectedLambda,
-          route: req.route,
-          fromNodeId: node.id,
-          fromFiberIndex: toFiberIndex,
-        ),
-      );
+        // propagate release request to previous node
+        if (req.fromNodeId != -1) {
+          _sentEvent(
+            req.fromNodeId,
+            ReleaseRequest(lightPathRequest: req.lightPathRequest),
+          );
+        }
+      } else {
+        // if fiber still available for given lambda, then
+        final randomSelect = _random.nextInt(indexedFibers.length);
+        toFiberIndex = indexedFibers.elementAt(randomSelect).$1;
+
+        // propagate resv request
+        _sentEvent(
+          toNodeId,
+          ResvRequest(
+            lightPathRequest: req.lightPathRequest,
+            selectedLambda: req.selectedLambda,
+            route: req.route,
+            fromNodeId: node.id, // request is coming from current node
+            fromFiberIndex: toFiberIndex,
+          ),
+        );
+      }
       break;
     }
 
-    resvRequestHolder[req] = ResvResult(
+    // save reserve info and mark used in the link
+    final resvResult = ResvResult(
       resvRequest: req,
       fromNodeId: req.fromNodeId,
       fromFiberIndex: req.fromFiberIndex,
       toNodeId: toNodeId,
       toFiberIndex: toFiberIndex,
     );
+    resvRequestHolder[req.lightPathRequest] = resvResult;
+
+    // use link : from
+    _changeLinkStatus(
+      resvResult.fromNodeId,
+      resvResult.fromFiberIndex,
+      req.selectedLambda,
+      false,
+    );
+
+    // use link : to
+    _changeLinkStatus(
+      resvResult.toNodeId,
+      resvResult.toFiberIndex,
+      req.selectedLambda,
+      false,
+    );
+
+    if (req.route.nodeIdSteps.first == node.id) {
+      // resv [ResvRequest] arrive at start, then link success
+      SimulationReporter.i.reportSuccess();
+
+      // spent hold time
+      await Future.delayed(req.lightPathRequest.holdTime.toMsDuration());
+
+      // propagate release event
+      _sentEvent(
+        req.fromNodeId,
+        ReleaseRequest(lightPathRequest: req.lightPathRequest),
+      );
+    }
   }
 
   /// release holded link when a [req] received
   Future<void> onReleaseRequest(ReleaseRequest req) async {
-    final reserveResult = resvRequestHolder[req.resvRequest];
+    final reserveResult = resvRequestHolder[req.lightPathRequest];
     if (reserveResult == null) return;
 
     // release link usage : from
-    if (reserveResult.fromNodeId != -1) {
-      final fromLinkInfo = node.linkInfo[reserveResult.fromNodeId];
-      fromLinkInfo?.fibers[reserveResult.fromFiberIndex]
-          .lambdaAvailability[reserveResult.resvRequest.selectedLambda] = true;
-    }
+    _changeLinkStatus(
+      reserveResult.fromNodeId,
+      reserveResult.fromFiberIndex,
+      reserveResult.resvRequest.selectedLambda,
+      true,
+    );
 
     // release link usage : to
-    final toLinkInfo = node.linkInfo[reserveResult.toNodeId];
-    toLinkInfo?.fibers[reserveResult.toFiberIndex]
-        .lambdaAvailability[reserveResult.resvRequest.selectedLambda] = true;
+    _changeLinkStatus(
+      reserveResult.toNodeId,
+      reserveResult.toFiberIndex,
+      reserveResult.resvRequest.selectedLambda,
+      true,
+    );
 
     // remove saved req
-    resvRequestHolder.remove(req.resvRequest);
+    resvRequestHolder.remove(req.lightPathRequest);
 
-    // start from behind to pass release req to prev node
-    final nodeIdRoutes = req.resvRequest.route.nodeIdSteps.toList();
-    final lastIndex = nodeIdRoutes.length - 1;
-    for (var i = lastIndex; i > 0; i--) {
-      final current = nodeIdRoutes[i];
-      if (current != node.id) continue;
-
-      final prevNodeId = nodeIdRoutes[i - 1];
-      _sentEvent(prevNodeId, req);
-      break;
-    }
+    // start from behind to pass release req to reserve-from node
+    if (reserveResult.fromNodeId == -1) return;
+    _sentEvent(reserveResult.fromNodeId, req);
   }
 
-  /// attach current node to next node link info
+  /// attach current node -> next node link info
   /// return next node id
   int _attachLinkInfo(ProbRequest probReq) {
     final nodeIdRoutes = probReq.route.nodeIdSteps.toList();
@@ -237,6 +279,11 @@ class NodeRunner {
     }
 
     return next;
+  }
+
+  void _changeLinkStatus(int nodeId, int fiberId, int lambdaId, bool status) {
+    final toLinkInfo = node.linkInfo[nodeId];
+    toLinkInfo?.fibers[fiberId].lambdaAvailability[lambdaId] = status;
   }
 
   void stop() {

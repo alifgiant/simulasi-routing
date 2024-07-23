@@ -31,3 +31,8 @@ extension MapRouteExt on Map<int, Set<int>> {
     return copiedMap;
   }
 }
+
+extension DoubleExt on double {
+  int toMicrosecondsInt() => (this * 1000000).round();
+  Duration toMsDuration() => Duration(microseconds: (this * 1000000).round());
+}
