@@ -144,7 +144,7 @@ class NodeRunner {
     final nodeIdRoutes = req.route.nodeIdSteps.toList();
     final lastIndex = nodeIdRoutes.length - 1;
 
-    // start from behind to find next node link
+    // start from behind to find next node link if any
     int toNodeId = -1;
     int toFiberIndex = -1;
     for (var i = lastIndex; i > 0; i--) {
@@ -162,6 +162,7 @@ class NodeRunner {
       if (indexedFibers.isEmpty) {
         // if fiber not available for given wavelength, thus blocked
         SimulationReporter.i.reportBlocked();
+        Logger.i.log('Block detected for ${req.lightPathRequest}:${req.route}');
 
         // propagate release request to previous node
         if (req.fromNodeId != -1) {
@@ -170,6 +171,9 @@ class NodeRunner {
             ReleaseRequest(lightPathRequest: req.lightPathRequest),
           );
         }
+
+        // early return when block is met
+        return;
       } else {
         // if fiber still available for given lambda, then
         final randomSelect = _random.nextInt(indexedFibers.length);
@@ -219,6 +223,7 @@ class NodeRunner {
     if (req.route.nodeIdSteps.first == node.id) {
       // resv [ResvRequest] arrive at start, then link success
       SimulationReporter.i.reportSuccess();
+      Logger.i.log('Successfull link for ${req.lightPathRequest}:${req.route}');
 
       // spent hold time
       await Future.delayed(req.lightPathRequest.holdTime.toMsDuration());
