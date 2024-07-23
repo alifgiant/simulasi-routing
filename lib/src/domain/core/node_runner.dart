@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:async/async.dart';
 import 'package:routing_nanda/src/domain/usecases/validate_config_usecase.dart';
+import 'package:routing_nanda/src/utils/history_holder.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
 import '../../data/event.dart';
@@ -24,6 +25,7 @@ class NodeRunner {
 
   final StreamController<Event> _streamController = StreamController();
   final Map<LightPathRequest, Set<ProbRequest>> probRequestHolder = {};
+  final Map<ResvRequest, ResvResult> resvRequestHolder = {};
 
   StreamSubscription<Event>? _listener;
 
@@ -89,6 +91,7 @@ class NodeRunner {
     final routeInfo = node.routeInfos[targetId];
     if (routeInfo == null) {
       Logger.i.log('ERROR: route option from $node to $targetId is not found');
+      SimulationReporter.i.reportNoRoute();
       return;
     }
 
@@ -113,7 +116,7 @@ class NodeRunner {
       final savedReq = probRequestHolder[probReq.lightPathRequest] ?? {};
 
       final totalCount = probReq.totalRouteCount;
-      if (totalCount == savedReq.length - 1) {
+      if (totalCount == savedReq.length + 1) {
         // if all req have arrived, do wavelength selection
         Logger.i.log('Step 3 - $node: Route and wavelength selection');
 
@@ -122,6 +125,7 @@ class NodeRunner {
         probRequestHolder.remove(probReq.lightPathRequest);
 
         // send reserve signal
+        Logger.i.log('processedReq: $processedReq');
       } else {
         // not all request have arrive, store first to use later
         savedReq.add(probReq);
@@ -141,8 +145,33 @@ class NodeRunner {
     // select a fiber based on wavelenght and hold for a duration
   }
 
+  /// release holded link when a [req] received
   Future<void> onReleaseRequest(ReleaseRequest req) async {
-    // release hold immediately
+    final reserveResult = resvRequestHolder[req.resvRequest];
+    if (reserveResult == null) return;
+
+    // release link usage
+    final fromLinkInfo = node.linkInfo[reserveResult.fromNodeId];
+    fromLinkInfo?.fibers[reserveResult.fromFiberIndex]
+        .lambdaAvailability[reserveResult.resvRequest.selectedLambda] = true;
+
+    final toLinkInfo = node.linkInfo[reserveResult.toNodeId];
+    toLinkInfo?.fibers[reserveResult.toFiberIndex]
+        .lambdaAvailability[reserveResult.resvRequest.selectedLambda] = true;
+    resvRequestHolder.remove(req.resvRequest);
+
+    final nodeIdRoutes = req.resvRequest.route.nodeIdSteps.toList();
+    final lastIndex = nodeIdRoutes.length - 1;
+
+    // start from behind to pass release req to prev node
+    for (var i = lastIndex; i > 0; i--) {
+      final current = nodeIdRoutes[i];
+      if (current != node.id) continue;
+
+      final prevNodeId = nodeIdRoutes[i - 1];
+      _sentEvent(prevNodeId, req);
+      break;
+    }
   }
 
   /// attach current node to next node link info
@@ -157,9 +186,10 @@ class NodeRunner {
       next = nodeIdRoutes[i + 1];
 
       final linkInfoToNext = node.linkInfo[next];
-      if (linkInfoToNext == null) continue;
+      if (linkInfoToNext == null) break;
 
       probReq.linkInfo[node.id] = linkInfoToNext;
+      break;
     }
 
     return next;
@@ -169,4 +199,21 @@ class NodeRunner {
     _listener?.cancel();
     _streamController.close();
   }
+}
+
+class ResvResult {
+  final ResvRequest resvRequest;
+  final int fromNodeId;
+  final int fromFiberIndex;
+
+  final int toNodeId;
+  final int toFiberIndex;
+
+  const ResvResult({
+    required this.resvRequest,
+    required this.fromNodeId,
+    required this.fromFiberIndex,
+    required this.toNodeId,
+    required this.toFiberIndex,
+  });
 }

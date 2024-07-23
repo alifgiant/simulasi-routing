@@ -24,11 +24,23 @@ class SimulationReporter {
 
   static final i = SimulationReporter._();
 
-  int noRouteFoundReq = 0, successRouteReq = 0, blockedRouteReq = 0;
+  int _noRouteFoundReq = 0, _successRouteReq = 0, _blockedRouteReq = 0;
+
+  void reportNoRoute() => _noRouteFoundReq += 1;
+  void reportSuccess() => _successRouteReq += 1;
+  void reportBlocked() => _blockedRouteReq += 1;
+
+  Map<String, int> readReport() {
+    return {
+      'no-route': _noRouteFoundReq,
+      'success': _successRouteReq,
+      'blocked': _blockedRouteReq,
+    };
+  }
 
   void clear() {
-    noRouteFoundReq = 0;
-    successRouteReq = 0;
-    blockedRouteReq = 0;
+    _noRouteFoundReq = 0;
+    _successRouteReq = 0;
+    _blockedRouteReq = 0;
   }
 }
