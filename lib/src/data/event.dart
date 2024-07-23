@@ -20,7 +20,7 @@ class LightPathRequest extends Event {
 class ProbRequest extends Event {
   final LightPathRequest lightPathRequest;
   final int sourceId, targetId;
-  final RouteInfo route;
+  final RouteOptions route;
   final int totalRouteCount;
   final Map<int, Map<int, Map<int, bool>>> linkInfo;
 
@@ -37,7 +37,7 @@ class ProbRequest extends Event {
 class ResvRequest extends Event {
   final LightPathRequest lightPathRequest;
   final int sourceId, targetId, selectedLambda;
-  final RouteInfo route;
+  final RouteOptions route;
 
   const ResvRequest({
     required this.lightPathRequest,

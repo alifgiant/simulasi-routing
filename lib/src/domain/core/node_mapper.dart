@@ -11,11 +11,11 @@ class NodeMapper {
   const NodeMapper({required this.nodeId});
 
   /// run BFS to all node then save it to [routingMap]
-  Map<int, Set<RouteInfo>> setupRouteMap(
+  Map<int, RouteInfo> setupRouteMap(
     Set<int> allNodeId,
     Map<int, Set<int>> combinedLink,
   ) {
-    Map<int, Set<RouteInfo>> routingMap = {};
+    Map<int, RouteInfo> routingMap = {};
 
     // other node ids that want to be routed
     final idsExcCurrent = Set.of(allNodeId)..remove(nodeId);
@@ -27,7 +27,10 @@ class NodeMapper {
         otherNodeId,
         combinedLink.deepCopy(),
       );
-      routingMap[otherNodeId] = routes;
+      routingMap[otherNodeId] = RouteInfo(
+        toNodeId: otherNodeId,
+        routeOptions: routes,
+      );
     }
 
     return routingMap;
@@ -35,7 +38,7 @@ class NodeMapper {
 
   /// run BFS to find route to [otherNodeId]
   /// will recursively find alternative route if a route found by removing found route
-  Set<RouteInfo> _findShortedRouteTo(
+  Set<RouteOptions> _findShortedRouteTo(
     int otherNodeId,
     Map<int, Set<int>> combinedLink,
   ) {
@@ -61,14 +64,14 @@ class NodeMapper {
       final isTargetFound = visitedId == otherNodeId;
       if (isTargetFound) {
         // create a new route
-        final newRoute = RouteInfo(
-          routes: {nodeId, ...plan.trail, visitedId},
+        final newRoute = RouteOptions(
+          nodeIdSteps: {nodeId, ...plan.trail, visitedId},
         );
 
         // create [newCombinedLink] to contain routes with removed
         // remove found route from [newCombinedLink] to try find another route
         final newCombinedLink = combinedLink.deepCopy();
-        final newRouteList = newRoute.routes.toList();
+        final newRouteList = newRoute.nodeIdSteps.toList();
         for (int i = 0; i < newRouteList.length - 1; i++) {
           final link = newCombinedLink[newRouteList[i]];
           if (link == null) continue;

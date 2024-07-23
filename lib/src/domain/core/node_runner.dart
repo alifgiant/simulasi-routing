@@ -23,6 +23,7 @@ class NodeRunner {
         _sentEvent = sentEvent;
 
   final StreamController<Event> _streamController = StreamController();
+  final Map<LightPathRequest, Set<ProbRequest>> probRequestHolder = {};
 
   StreamSubscription<Event>? _listener;
 
@@ -85,19 +86,19 @@ class NodeRunner {
   Future<void> onLightPathRequest(LightPathRequest req) async {
     Logger.i.log('Step 2 - $node: Collecting information by signaling');
     final targetId = _genRandomTarget(node.id);
-    final routeOptions = node.routingMap[targetId];
-    if (routeOptions == null) {
+    final routeInfo = node.routeInfos[targetId];
+    if (routeInfo == null) {
       Logger.i.log('ERROR: route option from $node to $targetId is not found');
       return;
     }
 
-    for (var route in routeOptions) {
+    for (var route in routeInfo.routeOptions) {
       final probReq = ProbRequest(
         lightPathRequest: req,
         sourceId: node.id,
         targetId: targetId,
         route: route,
-        totalRouteCount: routeOptions.length,
+        totalRouteCount: routeInfo.routeOptions.length,
         linkInfo: {},
       );
       final nextNodeId = _attachLinkInfo(probReq);
@@ -107,9 +108,29 @@ class NodeRunner {
 
   Future<void> onProbRequest(ProbRequest probReq) async {
     if (probReq.targetId == node.id) {
-      // final destination arrived
-      Logger.i.log('Step 3 - $node: Route and wavelength selection');
-      // send reserve signal
+      // req arrived in final destination
+      // access saved req if any
+      final savedReq = probRequestHolder[probReq.lightPathRequest] ?? {};
+
+      final totalCount = probReq.totalRouteCount;
+      if (totalCount == savedReq.length - 1) {
+        // if all req have arrived, do wavelength selection
+        Logger.i.log('Step 3 - $node: Route and wavelength selection');
+
+        // combine all req, new incoming with saved and delete saved placeholder
+        final processedReq = {probReq, ...savedReq};
+        probRequestHolder.remove(probReq.lightPathRequest);
+
+        // send reserve signal
+      } else {
+        // not all request have arrive, store first to use later
+        savedReq.add(probReq);
+        probRequestHolder[probReq.lightPathRequest] = savedReq;
+
+        Logger.i.log(
+          '$node - ProbReq arrived, ${savedReq.length} of $totalCount',
+        );
+      }
     } else {
       final nextNodeId = _attachLinkInfo(probReq);
       _sentEvent(nextNodeId, probReq);
@@ -127,12 +148,13 @@ class NodeRunner {
   /// attach current node to next node link info
   /// return next node id
   int _attachLinkInfo(ProbRequest probReq) {
-    final nodeIdRoutes = probReq.route.routes.toList();
+    final nodeIdRoutes = probReq.route.nodeIdSteps.toList();
     int next = nodeIdRoutes[1];
     for (var i = 0; i < nodeIdRoutes.length - 1; i++) {
       final current = nodeIdRoutes[i];
-      next = nodeIdRoutes[i + 1];
       if (current != node.id) continue;
+
+      next = nodeIdRoutes[i + 1];
 
       final linkInfoToNext = node.linkInfo[next];
       if (linkInfoToNext == null) continue;

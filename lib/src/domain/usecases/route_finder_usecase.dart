@@ -33,7 +33,7 @@ class RouteFinderUsecase {
 
         return MapEntry(
           key,
-          Node(id: value.id, routingMap: routeMap, linkInfo: linkMap),
+          Node(id: value.id, routeInfos: routeMap, linkInfo: linkMap),
         );
       },
     );

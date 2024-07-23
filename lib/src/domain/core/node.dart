@@ -5,11 +5,13 @@ class Node {
 
   /// {
   ///    Node_Target : RouteInfo{
-  ///       {1 -> 2 -> 3},
-  ///       {1 -> 2}
+  ///       - toId
+  ///       - route options:
+  ///         - {1 -> 2 -> 3},
+  ///         - {1 -> 2}
   ///    }
   /// }
-  final Map<int, Set<RouteInfo>> routingMap;
+  final Map<int, RouteInfo> routeInfos;
 
   /// {
   ///    Node_Target : {
@@ -27,7 +29,7 @@ class Node {
 
   Node({
     required this.id,
-    required this.routingMap,
+    required this.routeInfos,
     required this.linkInfo,
   });
 
@@ -37,31 +39,43 @@ class Node {
   Map<String, dynamic> toJson() {
     return {
       toString(): {
-        for (final entry in routingMap.entries)
-          entry.key.toString(): entry.value.map((e) => e.toString()),
+        for (final entry in routeInfos.entries)
+          entry.key.toString(): entry.value.routeOptions.map(
+            (e) => e.toString(),
+          ),
       },
     };
   }
 }
 
 class RouteInfo {
-  final Set<int> routes;
+  final int toNodeId;
+  final Set<RouteOptions> routeOptions;
 
-  const RouteInfo({
-    required this.routes,
+  RouteInfo({
+    required this.toNodeId,
+    required this.routeOptions,
+  });
+}
+
+class RouteOptions {
+  final Set<int> nodeIdSteps;
+
+  const RouteOptions({
+    required this.nodeIdSteps,
   });
 
   @override
-  String toString() => routes.join('->');
+  String toString() => nodeIdSteps.join('->');
 
   @override
-  int get hashCode => routes.fold(
+  int get hashCode => nodeIdSteps.fold(
         1,
         (prev, element) => prev ^ element.hashCode,
       );
 
   @override
-  bool operator ==(covariant RouteInfo other) {
-    return setEquals(routes, other.routes);
+  bool operator ==(covariant RouteOptions other) {
+    return setEquals(nodeIdSteps, other.nodeIdSteps);
   }
 }
