@@ -99,8 +99,6 @@ class NodeRunner {
       // start prob to each route
       final probReq = ProbRequest(
         lightPathRequest: req,
-        sourceId: node.id,
-        targetId: targetId,
         route: route,
         totalRouteCount: routeInfo.routeOptions.length,
         linkInfo: {},
@@ -111,7 +109,7 @@ class NodeRunner {
   }
 
   Future<void> onProbRequest(ProbRequest probReq) async {
-    if (probReq.targetId == node.id) {
+    if (probReq.route.nodeIdSteps.last == node.id) {
       // req arrived in final destination
       // access saved req if any
       final savedReq = probRequestHolder[probReq.lightPathRequest] ?? {};

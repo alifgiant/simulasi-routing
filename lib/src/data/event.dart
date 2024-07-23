@@ -19,15 +19,12 @@ class LightPathRequest extends Event {
 
 class ProbRequest extends Event {
   final LightPathRequest lightPathRequest;
-  final int sourceId, targetId;
   final RouteOptions route;
   final int totalRouteCount;
   final Map<int, LinkInfo> linkInfo;
 
   const ProbRequest({
     required this.lightPathRequest,
-    required this.sourceId,
-    required this.targetId,
     required this.route,
     required this.totalRouteCount,
     required this.linkInfo,
