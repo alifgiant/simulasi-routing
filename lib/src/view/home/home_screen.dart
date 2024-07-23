@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:routing_nanda/src/domain/core/vm.dart';
+import 'package:routing_nanda/src/utils/history_holder.dart';
 import 'package:routing_nanda/src/view/history/history_screen.dart';
 import 'package:routing_nanda/src/view/home/home_controller.dart';
 import 'package:routing_nanda/src/domain/usecases/experiment_usecase.dart';
@@ -181,12 +182,52 @@ class HomeView extends StatelessWidget {
               ],
             ),
           ),
-          FilledButton(
-            onPressed: controller.onStartSimulation,
-            style: FilledButton.styleFrom(
-              visualDensity: VisualDensity.comfortable,
+          Builder(
+            builder: (context) => FilledButton(
+              onPressed: () async {
+                await controller.onStartSimulation();
+                if (!context.mounted) return;
+
+                final reports = SimulationReporter.i.readReport();
+
+                final success = (reports['success'] ?? 1);
+                final blocked = (reports['blocked'] ?? 0);
+                final totalRouting = success + blocked;
+                final blockingProb = blocked / totalRouting;
+
+                showDialog(
+                  context: context,
+                  builder: (_) => Dialog(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Simulation Result',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 12),
+                          ...reports.entries.map(
+                            (entry) => Text('${entry.key} = ${entry.value}'),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Blocking Probablity: $blockingProb',
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+              style: FilledButton.styleFrom(
+                visualDensity: VisualDensity.comfortable,
+              ),
+              child: const Text('Mulai Simulasi'),
             ),
-            child: const Text('Mulai Simulasi'),
           ),
           const SizedBox(height: 20),
         ],

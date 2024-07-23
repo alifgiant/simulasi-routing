@@ -87,7 +87,9 @@ class NodeRunner {
   }
 
   Future<void> onLightPathRequest(LightPathRequest req) async {
+    SimulationReporter.i.reportCreated();
     Logger.i.log('Step 2 - $node: Collecting information by signaling');
+
     final targetId = _genRandomTarget(node.id);
     final routeInfo = node.routeInfos[targetId];
     if (routeInfo == null) {
