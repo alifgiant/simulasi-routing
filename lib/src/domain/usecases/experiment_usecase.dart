@@ -5,6 +5,7 @@ import 'package:routing_nanda/src/data/event.dart';
 import 'package:routing_nanda/src/domain/core/node.dart';
 import 'package:routing_nanda/src/domain/core/node_runner.dart';
 import 'package:routing_nanda/src/domain/usecases/validate_config_usecase.dart';
+import 'package:routing_nanda/src/utils/history_holder.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
 
 final Random _random = Random();
@@ -32,6 +33,9 @@ class ExperimentUsecase {
     Map<int, Node> routingMap,
     ExperimentParams expParam,
   ) async {
+    // reset simulation reporter everytime experiment start
+    SimulationReporter.i.clear();
+
     nodeRunners = routingMap.map(
       (key, value) => MapEntry(
         key,

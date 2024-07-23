@@ -96,6 +96,7 @@ class NodeRunner {
     }
 
     for (var route in routeInfo.routeOptions) {
+      // start prob to each route
       final probReq = ProbRequest(
         lightPathRequest: req,
         sourceId: node.id,
@@ -125,6 +126,7 @@ class NodeRunner {
         probRequestHolder.remove(probReq.lightPathRequest);
 
         // send reserve signal
+        // select a fiber based on wavelenght and hold for a duration
         Logger.i.log('processedReq: $processedReq');
       } else {
         // not all request have arrive, store first to use later
@@ -142,7 +144,47 @@ class NodeRunner {
   }
 
   Future<void> onResvRequest(ResvRequest req) async {
-    // select a fiber based on wavelenght and hold for a duration
+    final nodeIdRoutes = req.route.nodeIdSteps.toList();
+    final lastIndex = nodeIdRoutes.length - 1;
+
+    // start from behind to find next node link
+    int toNodeId = -1;
+    int toFiberIndex = -1;
+    for (var i = lastIndex; i > 0; i--) {
+      final current = nodeIdRoutes[i];
+      if (current != node.id) continue;
+
+      toNodeId = nodeIdRoutes[i - 1];
+      final linkInfo = node.linkInfo[toNodeId];
+      if (linkInfo == null) break;
+
+      final indexedFibers = linkInfo.fibers.indexed.where(
+        (item) => item.$2.lambdaAvailability[req.selectedLambda],
+      );
+      final randomSelect = _random.nextInt(indexedFibers.length);
+      toFiberIndex = indexedFibers.elementAt(randomSelect).$1;
+
+      // propagate resv request
+      _sentEvent(
+        toNodeId,
+        ResvRequest(
+          lightPathRequest: req.lightPathRequest,
+          selectedLambda: req.selectedLambda,
+          route: req.route,
+          fromNodeId: node.id,
+          fromFiberIndex: toFiberIndex,
+        ),
+      );
+      break;
+    }
+
+    resvRequestHolder[req] = ResvResult(
+      resvRequest: req,
+      fromNodeId: req.fromNodeId,
+      fromFiberIndex: req.fromFiberIndex,
+      toNodeId: toNodeId,
+      toFiberIndex: toFiberIndex,
+    );
   }
 
   /// release holded link when a [req] received
@@ -150,20 +192,24 @@ class NodeRunner {
     final reserveResult = resvRequestHolder[req.resvRequest];
     if (reserveResult == null) return;
 
-    // release link usage
-    final fromLinkInfo = node.linkInfo[reserveResult.fromNodeId];
-    fromLinkInfo?.fibers[reserveResult.fromFiberIndex]
-        .lambdaAvailability[reserveResult.resvRequest.selectedLambda] = true;
+    // release link usage : from
+    if (reserveResult.fromNodeId != -1) {
+      final fromLinkInfo = node.linkInfo[reserveResult.fromNodeId];
+      fromLinkInfo?.fibers[reserveResult.fromFiberIndex]
+          .lambdaAvailability[reserveResult.resvRequest.selectedLambda] = true;
+    }
 
+    // release link usage : to
     final toLinkInfo = node.linkInfo[reserveResult.toNodeId];
     toLinkInfo?.fibers[reserveResult.toFiberIndex]
         .lambdaAvailability[reserveResult.resvRequest.selectedLambda] = true;
+
+    // remove saved req
     resvRequestHolder.remove(req.resvRequest);
 
+    // start from behind to pass release req to prev node
     final nodeIdRoutes = req.resvRequest.route.nodeIdSteps.toList();
     final lastIndex = nodeIdRoutes.length - 1;
-
-    // start from behind to pass release req to prev node
     for (var i = lastIndex; i > 0; i--) {
       final current = nodeIdRoutes[i];
       if (current != node.id) continue;
@@ -199,21 +245,4 @@ class NodeRunner {
     _listener?.cancel();
     _streamController.close();
   }
-}
-
-class ResvResult {
-  final ResvRequest resvRequest;
-  final int fromNodeId;
-  final int fromFiberIndex;
-
-  final int toNodeId;
-  final int toFiberIndex;
-
-  const ResvResult({
-    required this.resvRequest,
-    required this.fromNodeId,
-    required this.fromFiberIndex,
-    required this.toNodeId,
-    required this.toFiberIndex,
-  });
 }

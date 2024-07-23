@@ -39,15 +39,31 @@ class ProbRequest extends Event {
 
 class ResvRequest extends Event {
   final LightPathRequest lightPathRequest;
-  final int sourceId, targetId, selectedLambda;
+  final int selectedLambda, fromNodeId, fromFiberIndex;
   final RouteOptions route;
 
   const ResvRequest({
     required this.lightPathRequest,
-    required this.sourceId,
-    required this.targetId,
     required this.selectedLambda,
     required this.route,
+    this.fromNodeId = -1,
+    this.fromFiberIndex = -1,
+  });
+}
+
+class ResvResult {
+  final ResvRequest resvRequest;
+  final int fromNodeId;
+  final int fromFiberIndex;
+  final int toNodeId;
+  final int toFiberIndex;
+
+  const ResvResult({
+    required this.resvRequest,
+    required this.fromNodeId,
+    required this.fromFiberIndex,
+    required this.toNodeId,
+    required this.toFiberIndex,
   });
 }
 
