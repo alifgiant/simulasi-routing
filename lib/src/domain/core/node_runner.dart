@@ -103,15 +103,13 @@ class NodeRunner {
       final nextNodeId = _attachLinkInfo(probReq);
       _sentEvent(nextNodeId, probReq);
     }
-
-    // // send prob signal
-    // Logger.i.log('Step 3: Route and wavelength selection');
-    // send signal
   }
 
   Future<void> onProbRequest(ProbRequest probReq) async {
     if (probReq.targetId == node.id) {
       // final destination arrived
+      Logger.i.log('Step 3 - $node: Route and wavelength selection');
+      // send reserve signal
     } else {
       final nextNodeId = _attachLinkInfo(probReq);
       _sentEvent(nextNodeId, probReq);
