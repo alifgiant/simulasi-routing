@@ -102,22 +102,33 @@ class NodeMapper {
     return {};
   }
 
-  Map<int, Map<int, Map<int, bool>>> setupLinkMap(
+  Map<int, LinkInfo> setupLinkMap(
     Map<int, Set<int>> combinedLinks,
     int fiberCount,
     int lambdaCount,
   ) {
     final links = combinedLinks[nodeId];
+
+    // if no links, then this node dont have any fiber connection
     if (links == null || links.isEmpty) return {};
 
     return {
       for (var linkId in links)
-        linkId: {
-          for (int f = 0; f < fiberCount; f++)
-            f: {
-              for (int w = 0; w < lambdaCount; w++) w: false,
-            },
-        },
+        linkId: LinkInfo(
+          toNodeId: linkId,
+          fibers: List.generate(
+            fiberCount,
+            (index) => Fiber(
+              fiberId: index,
+              lambdaAvailability: List.generate(
+                lambdaCount,
+                (_) => false,
+                growable: false,
+              ),
+            ),
+            growable: false,
+          ),
+        ),
     };
   }
 }

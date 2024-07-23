@@ -22,7 +22,7 @@ class ProbRequest extends Event {
   final int sourceId, targetId;
   final RouteOptions route;
   final int totalRouteCount;
-  final Map<int, Map<int, Map<int, bool>>> linkInfo;
+  final Map<int, LinkInfo> linkInfo;
 
   const ProbRequest({
     required this.lightPathRequest,
@@ -32,6 +32,9 @@ class ProbRequest extends Event {
     required this.totalRouteCount,
     required this.linkInfo,
   });
+
+  @override
+  String toString() => 'ProbRequest(${lightPathRequest.hashCode}:$route)';
 }
 
 class ResvRequest extends Event {

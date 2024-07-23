@@ -25,7 +25,7 @@ class Node {
   ///       },
   ///    }
   /// }
-  final Map<int, Map<int, Map<int, bool>>> linkInfo;
+  final Map<int, LinkInfo> linkInfo;
 
   Node({
     required this.id,
@@ -78,4 +78,24 @@ class RouteOptions {
   bool operator ==(covariant RouteOptions other) {
     return setEquals(nodeIdSteps, other.nodeIdSteps);
   }
+}
+
+class LinkInfo {
+  final int toNodeId;
+  final List<Fiber> fibers;
+
+  const LinkInfo({
+    required this.toNodeId,
+    required this.fibers,
+  });
+}
+
+class Fiber {
+  final int fiberId;
+  final List<bool> lambdaAvailability;
+
+  const Fiber({
+    required this.fiberId,
+    required this.lambdaAvailability,
+  });
 }
