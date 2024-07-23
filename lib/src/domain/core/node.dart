@@ -52,7 +52,7 @@ class RouteInfo {
   });
 
   @override
-  String toString() => routes.isEmpty ? 'direct' : routes.join('->');
+  String toString() => routes.join('->');
 
   @override
   int get hashCode => routes.fold(

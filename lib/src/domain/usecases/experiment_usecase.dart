@@ -1,17 +1,45 @@
+import 'dart:math';
+
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:routing_nanda/src/data/event.dart';
 import 'package:routing_nanda/src/domain/core/node.dart';
 import 'package:routing_nanda/src/domain/core/node_runner.dart';
 import 'package:routing_nanda/src/domain/usecases/validate_config_usecase.dart';
+import 'package:routing_nanda/src/utils/logger.dart';
+
+final Random _random = Random();
 
 class ExperimentUsecase {
+  Map<int, NodeRunner> nodeRunners = {};
+
+  int genRandomTarget(int from) {
+    final otherIds = nodeRunners.keys.where((e) => e != from);
+    final randomIndex = _random.nextInt(otherIds.length);
+    return otherIds.elementAt(randomIndex);
+  }
+
+  void sentEvent(int to, Event event) {
+    final nodeRunner = nodeRunners[to];
+    if (nodeRunner == null) {
+      Logger.i.log('ERROR: node target not found');
+      return;
+    }
+
+    nodeRunner.receive(event);
+  }
+
   Future<void> start(
     Map<int, Node> routingMap,
     ExperimentParams expParam,
   ) async {
-    final nodeRunners = routingMap.map(
+    nodeRunners = routingMap.map(
       (key, value) => MapEntry(
         key,
-        NodeRunner(node: value, nodeMap: routingMap),
+        NodeRunner(
+          node: value,
+          genRandomTarget: genRandomTarget,
+          sentEvent: sentEvent,
+        ),
       ),
     );
     for (var node in nodeRunners.values) {
