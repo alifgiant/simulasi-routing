@@ -22,12 +22,9 @@ class SetupNetworkConfigUsecase {
         'Nodes': circlesMap.values,
         'Total Node': circlesMap.length,
         'Links': links,
-        'Total Link': linksMap.values.fold(
-          0,
-          (prev, link) => prev + link.length,
-        ),
+        'Total Link': links.length,
         'Total light-path (link x fiber x lambda)':
-            linksMap.length * fiberCount * lambdaCount,
+            links.length * fiberCount * lambdaCount,
       },
     )}');
 
