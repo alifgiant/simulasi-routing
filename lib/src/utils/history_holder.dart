@@ -47,5 +47,6 @@ class SimulationReporter {
     _noRouteFoundReq = 0;
     _successRouteReq = 0;
     _blockedRouteReq = 0;
+    _totalRouteReq = 0;
   }
 }
