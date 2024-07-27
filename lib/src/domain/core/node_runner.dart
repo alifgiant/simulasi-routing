@@ -96,16 +96,21 @@ class NodeRunner {
 
   Future<void> onLightPathRequest(LightPathRequest req) async {
     SimulationReporter.i.reportCreated();
-    Logger.i.log('Step 2 - $node: Collecting information by signaling');
-
     final targetId = _genRandomTarget(node.id);
     final routeInfo = node.routeInfos[targetId];
+
+    Logger.i.log(
+      'Step 2 - $node: Collecting information by signaling',
+    );
     if (routeInfo == null) {
       Logger.i.log('ERROR: route option from $node to $targetId is not found');
       SimulationReporter.i.reportNoRoute();
       return;
     }
 
+    Logger.i.log(
+      'Sending prob to $targetId using ${routeInfo.routeOptions.length} routes',
+    );
     for (var route in routeInfo.routeOptions) {
       // start prob to each route
       final probReq = ProbRequest(
@@ -126,6 +131,9 @@ class NodeRunner {
       final savedReq = probRequestHolder[probReq.lightPathRequest] ?? {};
 
       final totalCount = probReq.totalRouteCount;
+      Logger.i.log(
+        '$node - ProbReq arrived, ${savedReq.length + 1} of $totalCount',
+      );
       if (totalCount == savedReq.length + 1) {
         // if all req have arrived, do wavelength selection
         Logger.i.log('Step 3 - $node: Route and wavelength selection');
@@ -139,10 +147,6 @@ class NodeRunner {
         // not all request have arrive, store first to use later
         savedReq.add(probReq);
         probRequestHolder[probReq.lightPathRequest] = savedReq;
-
-        Logger.i.log(
-          '$node - ProbReq arrived, ${savedReq.length} of $totalCount',
-        );
       }
     } else {
       final nextNodeId = _attachLinkInfo(probReq);
@@ -236,13 +240,14 @@ class NodeRunner {
       // resv [ResvRequest] arrive at start, then link success
       SimulationReporter.i.reportSuccess();
       Logger.i.log('Successfull link for ${req.lightPathRequest}:${req.route}');
+      Logger.i.log('Hold time: ${req.lightPathRequest.holdTime}s');
 
       // spent hold time
       await Future.delayed(req.lightPathRequest.holdTime.toMsDuration());
 
-      // propagate release event
+      // propagate release event, start with current node
       _sentEvent(
-        req.fromNodeId,
+        node.id,
         ReleaseRequest(lightPathRequest: req.lightPathRequest),
       );
     }

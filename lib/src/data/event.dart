@@ -63,7 +63,7 @@ class ResvRequest extends Event {
 
   @override
   String toString() =>
-      'ResvRequest(lightPathRequest:${lightPathRequest.id}, lambda:$selectedLambda,route:$route,)';
+      'ResvRequest(lightPathRequest:${lightPathRequest.id}, lambda:$selectedLambda, route:$route)';
 }
 
 class ResvResult {
