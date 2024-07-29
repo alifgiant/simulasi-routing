@@ -1,8 +1,12 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:routing_nanda/src/data/circle_data.dart';
 import 'package:routing_nanda/src/utils/history_holder.dart';
 import 'package:routing_nanda/src/utils/logger.dart';
+import 'package:routing_nanda/src/utils/utils.dart';
 
 import '../../domain/usecases/experiment_usecase.dart';
 import '../../domain/usecases/route_finder_usecase.dart';
@@ -178,5 +182,46 @@ class HomeController extends ChangeNotifier {
     )}');
 
     EasyLoading.showSuccess('Simulation Finished');
+  }
+
+  Future<void> importConfig() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json', 'JSON'],
+    );
+    if (result == null || result.files.isEmpty) return;
+
+    final byte = result.files.first.bytes!;
+
+    final dataStr = String.fromCharCodes(byte);
+    final mapData = jsonDecode(dataStr);
+
+    final circles = (mapData['circle'] as List).map(
+      (e) => CircleData.fromJson(e),
+    );
+    circlesMap
+      ..clear()
+      ..addAll({for (var circle in circles) circle.id: circle});
+    connectionCtlr.text = mapData['connection'];
+    fiberCount = mapData['fiber'] ?? fiberCount;
+    lambdaCount = mapData['lambda'] ?? lambdaCount;
+    offeredLoad = mapData['load'] ?? offeredLoad;
+    holdingTime = mapData['holdtime'] ?? holdingTime;
+
+    onConnectionChanged(connectionCtlr.text);
+  }
+
+  void exportConfig() {
+    final mapData = {
+      'circle': circlesMap.values.map((e) => e.toJson()).toList(),
+      'connection': connectionCtlr.text,
+      'fiber': fiberCount,
+      'lambda': lambdaCount,
+      'load': offeredLoad,
+      'holdtime': holdingTime,
+    };
+
+    final encoded = jsonEncode(mapData);
+    encoded.downloadAsFile(filename: 'app-config.json');
   }
 }
