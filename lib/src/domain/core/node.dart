@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:routing_nanda/src/utils/logger.dart';
 
 class Node {
   final int id;
@@ -90,6 +91,12 @@ class LinkInfo {
     required this.toNodeId,
     required this.fibers,
   });
+
+  @override
+  String toString() => yamlWriter.write({
+        'toNodeId': toNodeId,
+        'fibers': fibers,
+      });
 }
 
 class Fiber {
@@ -100,6 +107,15 @@ class Fiber {
     required this.fiberId,
     required this.lambdaAvailability,
   });
+
+  @override
+  String toString() => yamlWriter.write({
+        'fiberId': fiberId,
+        'lambdaAvailability': {
+          for (var item in lambdaAvailability.indexed)
+            item.$1.toString(): item.$2.name,
+        },
+      });
 }
 
 enum Availability { used, free }

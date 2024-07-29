@@ -75,7 +75,7 @@ class NodeRunner {
       _generateRequests(),
     ]).listen(
       (req) {
-        Logger.i.log('$node - event received $req');
+        Logger.i.log('$node - event received ${req.simple()}');
         switch (req) {
           case LightPathRequest():
             onLightPathRequest(req);
@@ -132,7 +132,7 @@ class NodeRunner {
 
       final totalCount = probReq.totalRouteCount;
       Logger.i.log(
-        '$node - ProbReq arrived, ${savedReq.length + 1} of $totalCount',
+        '$node - ProbSignal arrived, ${savedReq.length + 1} of $totalCount',
       );
       if (totalCount == savedReq.length + 1) {
         // if all req have arrived, do wavelength selection
@@ -315,7 +315,9 @@ class NodeRunner {
 
   void _processProbReq(Set<ProbSignal> processedReq) {
     // send reserve signal
-    Logger.i.log('$node - Process ProbReq: $processedReq');
+    Logger.i.log(
+      '$node - Process ${processedReq.length} ProbSignal:\n${yamlWriter.write(processedReq.toList())}',
+    );
     List<PathCost> pathCosts = calculatePathCost(processedReq);
 
     if (pathCosts.isEmpty) {
@@ -374,10 +376,10 @@ class NodeRunner {
 
   List<PathCost> calculatePathCost(Set<ProbSignal> processedReq) {
     final pathCosts = <PathCost>[];
-    for (var probReq in processedReq) {
+    for (var probSignal in processedReq) {
       // for each route, represented by diff ProbReq
       for (var lambdaId = 0; lambdaId < expParam.lambdaCount; lambdaId++) {
-        final hopCosts = probReq.linkInfo.values.map(
+        final hopCosts = probSignal.linkInfo.values.map(
           (e) {
             final fiberCountWithUsedLambda = e.fibers
                 .where(
@@ -412,8 +414,8 @@ class NodeRunner {
 
         pathCosts.add(
           PathCost(
-            lightPathRequest: probReq.lightPathRequest,
-            route: probReq.route,
+            lightPathRequest: probSignal.lightPathRequest,
+            route: probSignal.route,
             lambdaId: lambdaId,
             cost: cost,
           ),

@@ -1,7 +1,10 @@
 import 'package:routing_nanda/src/domain/core/node.dart';
+import 'package:routing_nanda/src/utils/logger.dart';
 
 sealed class Event {
   const Event();
+
+  String simple() => toString();
 }
 
 class LightPathRequest extends Event {
@@ -31,9 +34,7 @@ class PathCost {
   });
 
   @override
-  String toString() {
-    return 'PathCost(route:$route, lambda:$lambdaId, $cost)';
-  }
+  String toString() => 'PathCost(route:$route, lambda:$lambdaId, $cost)';
 }
 
 class ProbSignal extends Event {
@@ -50,7 +51,17 @@ class ProbSignal extends Event {
   });
 
   @override
-  String toString() => 'ProbSignal(${lightPathRequest.hashCode}:$route)';
+  String simple() => 'ProbSignal($route)';
+
+  @override
+  String toString() => yamlWriter.write(
+        {
+          'route': route,
+          'link-info': {
+            for (var item in linkInfo.entries) item.key.toString(): item.value,
+          },
+        },
+      );
 }
 
 class ResvSignal extends Event {
