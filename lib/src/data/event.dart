@@ -34,7 +34,7 @@ class PathCost {
   });
 
   @override
-  String toString() => 'PathCost(route:$route, lambda:$lambdaId, $cost)';
+  String toString() => 'PathCost(route:$route, w:$lambdaId, cost:$cost)';
 }
 
 class ProbSignal extends Event {

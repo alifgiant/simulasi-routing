@@ -173,7 +173,8 @@ class NodeRunner {
       final indexedFibers = linkInfo.fibers.indexed;
       final indexedFreeFibers = indexedFibers.where(
         (item) =>
-            item.$2.lambdaAvailability[req.selectedLambda] == Availability.free,
+            item.$2.lambdaAvailability[req.selectedLambda] ==
+            Availability.available,
       );
       if (indexedFreeFibers.isEmpty) {
         // if fiber not available for given wavelength, thus blocked
@@ -263,7 +264,7 @@ class NodeRunner {
       reserveResult.fromNodeId,
       reserveResult.fromFiberIndex,
       reserveResult.resvRequest.selectedLambda,
-      Availability.free,
+      Availability.available,
     );
 
     // release link usage : to
@@ -271,7 +272,7 @@ class NodeRunner {
       reserveResult.toNodeId,
       reserveResult.toFiberIndex,
       reserveResult.resvRequest.selectedLambda,
-      Availability.free,
+      Availability.available,
     );
 
     // remove saved req
@@ -370,7 +371,7 @@ class NodeRunner {
       ),
     );
     Logger.i.log(
-      '$node - ${processedReq.first.lightPathRequest} select lamda:${selectedCost.lambdaId}, route:${selectedCost.route}, cost:${selectedCost.cost}',
+      '$node - ${processedReq.first.lightPathRequest} select wavelength:${selectedCost.lambdaId}, route:${selectedCost.route}, cost:${selectedCost.cost}',
     );
   }
 

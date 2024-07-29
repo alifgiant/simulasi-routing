@@ -23,7 +23,7 @@ class SetupNetworkConfigUsecase {
         'Total Node': circlesMap.length,
         'Links': links,
         'Total Link': links.length,
-        'Total light-path (link x fiber x lambda)':
+        'Total light-path (link x fiber x wavelength)':
             links.length * fiberCount * lambdaCount,
       },
     )}');

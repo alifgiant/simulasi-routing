@@ -122,7 +122,7 @@ class NodeMapper {
               fiberId: index,
               lambdaAvailability: List.generate(
                 lambdaCount,
-                (_) => Availability.free,
+                (_) => Availability.available,
                 growable: false,
               ),
             ),

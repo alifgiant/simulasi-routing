@@ -111,11 +111,11 @@ class Fiber {
   @override
   String toString() => yamlWriter.write({
         'fiberId': fiberId,
-        'lambdaAvailability': {
+        'wavelength availability': {
           for (var item in lambdaAvailability.indexed)
-            item.$1.toString(): item.$2.name,
+            'w${item.$1.toString()}': item.$2.name,
         },
       });
 }
 
-enum Availability { used, free }
+enum Availability { used, available }
