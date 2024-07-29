@@ -27,7 +27,7 @@ class NodeRunner {
         _sentEvent = sentEvent;
 
   StreamController<Event>? _streamController;
-  final Map<LightPathRequest, Set<ProbRequest>> probRequestHolder = {};
+  final Map<LightPathRequest, Set<ProbSignal>> probRequestHolder = {};
   final Map<LightPathRequest, ResvResult> resvRequestHolder = {};
 
   StreamSubscription<Event>? _listener;
@@ -80,13 +80,13 @@ class NodeRunner {
           case LightPathRequest():
             onLightPathRequest(req);
             break;
-          case ProbRequest():
+          case ProbSignal():
             onProbRequest(req);
             break;
-          case ResvRequest():
+          case ResvSignal():
             onResvRequest(req);
             break;
-          case ReleaseRequest():
+          case ReleaseSignal():
             onReleaseRequest(req);
             break;
         }
@@ -113,7 +113,7 @@ class NodeRunner {
     );
     for (var route in routeInfo.routeOptions) {
       // start prob to each route
-      final probReq = ProbRequest(
+      final probReq = ProbSignal(
         lightPathRequest: req,
         route: route,
         totalRouteCount: routeInfo.routeOptions.length,
@@ -124,7 +124,7 @@ class NodeRunner {
     }
   }
 
-  Future<void> onProbRequest(ProbRequest probReq) async {
+  Future<void> onProbRequest(ProbSignal probReq) async {
     if (probReq.route.nodeIdSteps.last == node.id) {
       // if req arrived in final destination, try wavelength selection
       // access saved req if any
@@ -154,7 +154,7 @@ class NodeRunner {
     }
   }
 
-  Future<void> onResvRequest(ResvRequest req) async {
+  Future<void> onResvRequest(ResvSignal req) async {
     final nodeIdRoutes = req.route.nodeIdSteps.toList();
     final lastIndex = nodeIdRoutes.length - 1;
 
@@ -184,7 +184,7 @@ class NodeRunner {
         if (req.fromNodeId != -1) {
           _sentEvent(
             req.fromNodeId,
-            ReleaseRequest(lightPathRequest: req.lightPathRequest),
+            ReleaseSignal(lightPathRequest: req.lightPathRequest),
           );
         }
 
@@ -198,7 +198,7 @@ class NodeRunner {
         // propagate resv request
         _sentEvent(
           toNodeId,
-          ResvRequest(
+          ResvSignal(
             lightPathRequest: req.lightPathRequest,
             selectedLambda: req.selectedLambda,
             route: req.route,
@@ -248,13 +248,13 @@ class NodeRunner {
       // propagate release event, start with current node
       _sentEvent(
         node.id,
-        ReleaseRequest(lightPathRequest: req.lightPathRequest),
+        ReleaseSignal(lightPathRequest: req.lightPathRequest),
       );
     }
   }
 
   /// release holded link when a [req] received
-  Future<void> onReleaseRequest(ReleaseRequest req) async {
+  Future<void> onReleaseRequest(ReleaseSignal req) async {
     final reserveResult = resvRequestHolder[req.lightPathRequest];
     if (reserveResult == null) return;
 
@@ -284,7 +284,7 @@ class NodeRunner {
 
   /// attach current node -> next node link info
   /// return next node id
-  int _attachLinkInfo(ProbRequest probReq) {
+  int _attachLinkInfo(ProbSignal probReq) {
     final nodeIdRoutes = probReq.route.nodeIdSteps.toList();
     int next = nodeIdRoutes[1];
     for (var i = 0; i < nodeIdRoutes.length - 1; i++) {
@@ -313,7 +313,7 @@ class NodeRunner {
     toLinkInfo?.fibers[fiberId].lambdaAvailability[lambdaId] = status;
   }
 
-  void _processProbReq(Set<ProbRequest> processedReq) {
+  void _processProbReq(Set<ProbSignal> processedReq) {
     // send reserve signal
     Logger.i.log('$node - Process ProbReq: $processedReq');
     List<PathCost> pathCosts = calculatePathCost(processedReq);
@@ -361,7 +361,7 @@ class NodeRunner {
 
     _sentEvent(
       node.id,
-      ResvRequest(
+      ResvSignal(
         lightPathRequest: selectedCost.lightPathRequest,
         selectedLambda: selectedCost.lambdaId,
         route: selectedCost.route,
@@ -372,7 +372,7 @@ class NodeRunner {
     );
   }
 
-  List<PathCost> calculatePathCost(Set<ProbRequest> processedReq) {
+  List<PathCost> calculatePathCost(Set<ProbSignal> processedReq) {
     final pathCosts = <PathCost>[];
     for (var probReq in processedReq) {
       // for each route, represented by diff ProbReq

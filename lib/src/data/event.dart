@@ -36,13 +36,13 @@ class PathCost {
   }
 }
 
-class ProbRequest extends Event {
+class ProbSignal extends Event {
   final LightPathRequest lightPathRequest;
   final RouteOptions route;
   final int totalRouteCount;
   final Map<int, LinkInfo> linkInfo;
 
-  const ProbRequest({
+  const ProbSignal({
     required this.lightPathRequest,
     required this.route,
     required this.totalRouteCount,
@@ -50,15 +50,15 @@ class ProbRequest extends Event {
   });
 
   @override
-  String toString() => 'ProbRequest(${lightPathRequest.hashCode}:$route)';
+  String toString() => 'ProbSignal(${lightPathRequest.hashCode}:$route)';
 }
 
-class ResvRequest extends Event {
+class ResvSignal extends Event {
   final LightPathRequest lightPathRequest;
   final int selectedLambda, fromNodeId, fromFiberIndex;
   final RouteOptions route;
 
-  const ResvRequest({
+  const ResvSignal({
     required this.lightPathRequest,
     required this.selectedLambda,
     required this.route,
@@ -68,11 +68,11 @@ class ResvRequest extends Event {
 
   @override
   String toString() =>
-      'ResvRequest(lightPathRequest:${lightPathRequest.id}, lambda:$selectedLambda, route:$route)';
+      'ResvSignal(lightPathRequest:${lightPathRequest.id}, lambda:$selectedLambda, route:$route)';
 }
 
 class ResvResult {
-  final ResvRequest resvRequest;
+  final ResvSignal resvRequest;
   final int fromNodeId;
   final int fromFiberIndex;
   final int toNodeId;
@@ -87,14 +87,13 @@ class ResvResult {
   });
 }
 
-class ReleaseRequest extends Event {
+class ReleaseSignal extends Event {
   final LightPathRequest lightPathRequest;
 
-  const ReleaseRequest({
+  const ReleaseSignal({
     required this.lightPathRequest,
   });
 
   @override
-  String toString() =>
-      'ReleaseRequest(lightPathRequest:${lightPathRequest.id})';
+  String toString() => 'ReleaseSignal(lightPathRequest:${lightPathRequest.id})';
 }
