@@ -317,27 +317,22 @@ class NodeRunner {
     // send reserve signal
     Logger.i.log('$node - Process ProbReq: $processedReq');
     List<PathCost> pathCosts = calculatePathCost(processedReq);
+
     if (pathCosts.isEmpty) {
       // if path cost is empty, then no possible path to be open, thus blocked
       SimulationReporter.i.reportBlocked();
       Logger.i.log(
         'Block detected for ${processedReq.first.lightPathRequest}:all-route',
       );
-    } else if (pathCosts.length == 1) {
-      // if only one possible path
-      final pathCost = pathCosts.first;
-      _sentEvent(
-        node.id,
-        ResvRequest(
-          lightPathRequest: pathCost.lightPathRequest,
-          selectedLambda: pathCost.lambdaId,
-          route: pathCost.route,
-        ),
-      );
-      Logger.i.log(
-        '$node - ${processedReq.first.lightPathRequest} select lamda:${pathCost.lambdaId} route:${pathCost.route}',
-      );
-    } else {
+      return;
+    }
+
+    Logger.i.log('Path cost:\n${yamlWriter.write(pathCosts)}');
+
+    // by default user first path
+    PathCost selectedCost = pathCosts.first;
+
+    if (pathCosts.length > 1) {
       // if more than one possible path, use one minimun cost
       pathCosts.sort((a, b) {
         final costCompared = a.cost.compareTo(b.cost);
@@ -350,7 +345,7 @@ class NodeRunner {
         return hopCompared;
       });
 
-      PathCost selectedCost = pathCosts.first; // Minimum PathCost
+      selectedCost = pathCosts.first; // Minimum PathCost
       final sameCosts = pathCosts.where(
         (pathCost) =>
             pathCost.cost == selectedCost.cost &&
@@ -362,19 +357,19 @@ class NodeRunner {
         final randomCostId = _random.nextInt(sameCosts.length);
         selectedCost = sameCosts.elementAt(randomCostId);
       }
-
-      _sentEvent(
-        node.id,
-        ResvRequest(
-          lightPathRequest: selectedCost.lightPathRequest,
-          selectedLambda: selectedCost.lambdaId,
-          route: selectedCost.route,
-        ),
-      );
-      Logger.i.log(
-        '$node - ${processedReq.first.lightPathRequest} select lamda:${selectedCost.lambdaId} route:${selectedCost.route}',
-      );
     }
+
+    _sentEvent(
+      node.id,
+      ResvRequest(
+        lightPathRequest: selectedCost.lightPathRequest,
+        selectedLambda: selectedCost.lambdaId,
+        route: selectedCost.route,
+      ),
+    );
+    Logger.i.log(
+      '$node - ${processedReq.first.lightPathRequest} select lamda:${selectedCost.lambdaId}, route:${selectedCost.route}, cost:${selectedCost.cost}',
+    );
   }
 
   List<PathCost> calculatePathCost(Set<ProbRequest> processedReq) {

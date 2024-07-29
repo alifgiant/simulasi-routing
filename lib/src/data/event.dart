@@ -29,6 +29,11 @@ class PathCost {
     required this.lambdaId,
     required this.cost,
   });
+
+  @override
+  String toString() {
+    return 'PathCost(route:$route, lambda:$lambdaId, $cost)';
+  }
 }
 
 class ProbRequest extends Event {
