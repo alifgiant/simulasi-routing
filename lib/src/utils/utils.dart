@@ -12,20 +12,15 @@ extension ContextExt on BuildContext {
 extension StringExt on String {
   void downloadAsFile({String? filename}) {
     final fileName = filename ?? 'logs-${DateTime.now()}.txt';
-    final mimeType = fileName.endsWith(
-      '.json',
-    )
-        ? 'application/json'
-        : 'text/plain';
-    document.createElement('a') as HTMLAnchorElement
-      ..href = '${Uri.dataFromString(
-        this,
-        mimeType: mimeType,
-        encoding: utf8,
-      )}'
+    final bytes = utf8.encode(this);
+    final anchor = document.createElement('a') as HTMLAnchorElement
+      ..href = "data:application/octet-stream;base64,${base64Encode(bytes)}"
       ..style.display = 'none'
-      ..download = fileName
-      ..click();
+      ..download = fileName;
+
+    document.body!.appendChild(anchor);
+    anchor.click();
+    document.body!.removeChild(anchor);
   }
 }
 
