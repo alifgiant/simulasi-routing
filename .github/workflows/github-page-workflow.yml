@@ -19,8 +19,8 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       - name: Build
-        run: flutter build web
-        # run: flutter build web --wasm
+        # run: flutter build web
+        run: flutter build web --wasm
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3.0.1
         with:
