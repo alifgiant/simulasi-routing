@@ -158,8 +158,8 @@ class HomeView extends StatelessWidget {
                     Slider(
                       value: controller.lambdaCount.toDouble(),
                       min: 1,
-                      max: 16,
-                      divisions: 16,
+                      max: 20,
+                      divisions: 20,
                       onChanged: controller.changeLambda,
                     ),
                     ListTile(
