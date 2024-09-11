@@ -79,7 +79,7 @@ class ResvSignal extends Event {
 
   @override
   String toString() =>
-      'ResvSignal(lightPathRequest:${lightPathRequest.id}, lambda:$selectedLambda, route:$route)';
+      'ResvSignal(lightPathRequest:${lightPathRequest.id}, wavelength:$selectedLambda, route:$route)';
 }
 
 class ResvResult {

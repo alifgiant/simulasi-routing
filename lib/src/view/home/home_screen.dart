@@ -104,7 +104,7 @@ class HomeView extends StatelessWidget {
                   value: controller.experimentDuration.toDouble(),
                   min: 0,
                   max: 240,
-                  divisions: 24,
+                  divisions: 240,
                   onChanged: controller.changeExperimentDuration,
                 ),
                 const SizedBox(height: 12),
