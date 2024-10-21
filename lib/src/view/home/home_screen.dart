@@ -90,11 +90,11 @@ class HomeView extends StatelessWidget {
           Expanded(
             child: ListView(
               children: [
-                const Text('Pengaturan', style: TextStyle(fontSize: 21)),
+                const Text('Settings', style: TextStyle(fontSize: 21)),
                 const SizedBox(height: 4),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Durasi Simulasi (detik)'),
+                  title: const Text('Simulation Duration (seconds)'),
                   trailing: Text(
                     controller.experimentDuration.toString(),
                     style: const TextStyle(fontSize: 16),
@@ -109,7 +109,7 @@ class HomeView extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 ExpansionTile(
-                  title: const Text('Koneksi'),
+                  title: const Text('Connection'),
                   tilePadding: EdgeInsets.zero,
                   initiallyExpanded: true,
                   children: [
@@ -117,7 +117,7 @@ class HomeView extends StatelessWidget {
                     TextField(
                       controller: controller.connectionCtlr,
                       decoration: const InputDecoration(
-                        hintText: 'contoh: 0-1, 2-3, 1-2',
+                        hintText: 'ex: 0-1, 2-3, 1-2',
                         hintStyle: TextStyle(color: Colors.black38),
                         border: OutlineInputBorder(),
                       ),
@@ -134,7 +134,7 @@ class HomeView extends StatelessWidget {
                     const SizedBox(height: 4),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Banyak Serat'),
+                      title: const Text('Fiber Count'),
                       trailing: Text(
                         controller.fiberCount.toString(),
                         style: const TextStyle(fontSize: 16),
@@ -149,7 +149,7 @@ class HomeView extends StatelessWidget {
                     ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Panjang Gelombang'),
+                      title: const Text('Wavelength count'),
                       trailing: Text(
                         controller.lambdaCount.toString(),
                         style: const TextStyle(fontSize: 16),
@@ -164,7 +164,7 @@ class HomeView extends StatelessWidget {
                     ),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Beban Jaringan'),
+                      title: const Text('Offered Load'),
                       trailing: Text(
                         controller.offeredLoad.toString(),
                         style: const TextStyle(fontSize: 16),
@@ -178,7 +178,7 @@ class HomeView extends StatelessWidget {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text(
-                        'Rata-rata waktu penggunaan jalur (detik)',
+                        'Mead hold time (seconds)',
                       ),
                       trailing: Text(
                         controller.holdingTime.toString(),
@@ -243,7 +243,7 @@ class HomeView extends StatelessWidget {
               style: FilledButton.styleFrom(
                 visualDensity: VisualDensity.comfortable,
               ),
-              child: const Text('Mulai Simulasi'),
+              child: const Text('Start Simulation'),
             ),
           ),
           const SizedBox(height: 20),

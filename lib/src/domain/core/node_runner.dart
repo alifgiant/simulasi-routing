@@ -192,7 +192,7 @@ class NodeRunner {
         // early return when block is met
         return;
       } else {
-        // if fiber still available for given lambda, then
+        // if fiber still available for given wavelength, then
         final randomSelect = _random.nextInt(indexedFreeFibers.length);
         toFiberIndex = indexedFreeFibers.elementAt(randomSelect).$1;
 
